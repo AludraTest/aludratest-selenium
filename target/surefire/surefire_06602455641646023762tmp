@@ -1,0 +1,6 @@
+#surefire_0
+#Thu Jan 21 18:02:42 CET 2016
+performLocalTests=true
+user.dir=C\:\\DEV\\workspace\\aludratest-selenium
+localRepository=C\:\\dev\\maven\\repository
+basedir=C\:\\DEV\\workspace\\aludratest-selenium

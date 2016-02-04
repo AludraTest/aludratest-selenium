@@ -1,0 +1,181 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>aludratest-selenium</artifactId>
+	<version>3.1.0-SNAPSHOT</version>
+	<name>AludraTest Selenium Service</name>
+	<description>Enables functional testing of web applications using the AludraTest Service API and Selenium as underlying automation engine.</description>
+
+	<parent>
+		<groupId>org.aludratest</groupId>
+		<artifactId>aludratest-parent-pom</artifactId>
+		<version>1</version>
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<aludratest.version>3.1.0-SNAPSHOT</aludratest.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+		
+		<!-- for Selenium services -->
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>2.42.2</version>
+		</dependency>
+
+		<!-- for Selenium services -->
+		<dependency>
+			<groupId>org.seleniumhq.selenium.client-drivers</groupId>
+			<artifactId>selenium-java-client-driver</artifactId>
+			<version>1.0.2</version>
+		</dependency>
+		
+		<!-- for Selenium services (PhantomJS driver) -->
+		<dependency>
+			<groupId>com.codeborne</groupId>
+			<artifactId>phantomjsdriver</artifactId>
+			<version>1.2.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.seleniumhq.selenium</groupId>
+					<artifactId>selenium-remote-driver</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.seleniumhq.selenium</groupId>
+					<artifactId>selenium-java</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+		<!-- for Selenium services (use later HtmlUnit version than referenced in 2.42.2) -->
+		<dependency>
+			<groupId>net.sourceforge.htmlunit</groupId>
+			<artifactId>htmlunit</artifactId>
+			<version>2.15</version>
+		</dependency>
+
+		<!-- for Selenium services (XPath lookup helper) -->
+		<dependency>
+			<groupId>net.sf.jtidy</groupId>
+			<artifactId>jtidy</artifactId>
+			<version>r938</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.aludratest</groupId>
+			<artifactId>aludratest-testing-harness</artifactId>
+			<version>${aludratest.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<scm>
+		<connection>scm:git:https://git@github.com:AludraTest/${project.artifactId}.git</connection>
+		<developerConnection>scm:git:https://git@github.com/AludraTest/${project.artifactId}.git</developerConnection>
+		<url>https://github.com/AludraTest/${project.artifactId}.git</url>
+		<tag>HEAD</tag>
+	</scm>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<!-- unit tests -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.17</version>
+				<configuration>
+					<argLine>-DperformLocalTests=${performLocalTests}</argLine>
+					<excludes>
+						<exclude>**/integrationtest/**</exclude>
+					</excludes>
+				</configuration>
+				<executions>
+					<execution>
+						<id>surefire-integration-test</id>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<argLine>-DperformLocalTests=${performLocalTests}</argLine>
+							<excludes>
+								<exclude>**/*Selenium1*</exclude>
+							</excludes>
+							<includes>
+								<include>**/integrationtest/**</include>
+							</includes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		
+			<plugin>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>8.1.16.v20140903</version>
+				<configuration>
+					<webAppSourceDirectory>${project.basedir}/src/test/webapp</webAppSourceDirectory>
+					<classesDirectory>${project.basedir}/target/test-classes</classesDirectory>
+					<stopKey>stop-integration-test</stopKey>
+					<stopPort>8088</stopPort>
+				</configuration>
+				<executions>
+					<execution>
+						<id>start-jetty</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+						<configuration>
+							<scanIntervalSeconds>0</scanIntervalSeconds>
+							<daemon>true</daemon>
+						</configuration>
+					</execution>
+					<execution>
+						<id>stop-jetty</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	
+
+	<issueManagement>
+		<url>https://github.com/AludraTest/${project.artifactId}/issues</url>
+		<system>GitHub Issues</system>
+	</issueManagement>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+		<site>
+			<!-- this is not used at all, as GitHub site-deploy is used. But site 
+				Plugin requires this to be here to work! -->
+			<id>local-dummy</id>
+			<url>file:/./target/site-deployment</url>
+		</site>
+	</distributionManagement>
+</project>
