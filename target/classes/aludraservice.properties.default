@@ -1,2 +1,0 @@
-org.aludratest.service.gui.web.AludraWebGUI=org.aludratest.service.gui.web.selenium.selenium1.AludraSelenium2
-org.aludratest.service.gui.web.selenium.SeleniumResourceService=org.aludratest.service.gui.web.selenium.LocalSeleniumResourceService
