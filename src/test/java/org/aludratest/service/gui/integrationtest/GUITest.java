@@ -18,14 +18,12 @@ package org.aludratest.service.gui.integrationtest;
 import static org.junit.Assert.assertEquals;
 
 import org.aludratest.AludraTest;
-import org.aludratest.impl.log4testing.data.TestCaseLog;
-import org.aludratest.impl.log4testing.data.TestLogger;
-import org.aludratest.impl.log4testing.data.TestStepLog;
 import org.aludratest.service.ComponentId;
 import org.aludratest.service.gui.web.AludraWebGUI;
 import org.aludratest.service.gui.web.selenium.selenium1.AludraSelenium1;
 import org.aludratest.service.gui.web.selenium.selenium2.AludraSelenium2;
 import org.aludratest.testcase.TestStatus;
+import org.aludratest.testcase.event.TestStepInfo;
 import org.aludratest.testcase.impl.AludraTestContextImpl;
 import org.aludratest.testing.LocalTestCase;
 import org.aludratest.testing.util.DirectLogTestListener;
@@ -49,7 +47,7 @@ public abstract class GUITest extends LocalTestCase {
     protected AludraWebGUI aludraWebGUI;
     protected GUITestUIMap guiTestUIMap;
     protected ComponentId<AludraWebGUI> serviceId;
-    protected TestCaseLog tCase;
+    protected DirectLogTestListener logListener;
     static int testMethodID = 0;
 
     protected static final int DEFAULT_TIMEOUT = 1000;
@@ -72,9 +70,7 @@ public abstract class GUITest extends LocalTestCase {
         aludraTest = AludraTest.startFramework();
 
         // set test case instance, gives every test method a new ID
-        tCase = TestLogger.getTestCase(this.getClass().getName() + testMethodID++);
-        tCase.newTestStepGroup("initialization");
-        setContext(new AludraTestContextImpl(new DirectLogTestListener(tCase), aludraTest.getServiceManager()));
+        setContext(new AludraTestContextImpl(logListener = new DirectLogTestListener(), aludraTest.getServiceManager()));
 
         // configure aludra service with url.of.aut
         System.setProperty("ALUDRATEST_CONFIG/seleniumWrapper/_testui/url.of.aut", getTestPageUrl());
@@ -113,15 +109,15 @@ public abstract class GUITest extends LocalTestCase {
      */
     protected void checkLastStepStatus(TestStatus expectedStatus) {
         // get the last test step
-        TestStepLog lastStep = tCase.getLastTestStep();
+        TestStepInfo lastStep = logListener.getLastTestStep();
         // format the failure message
         String message = lastStep.getErrorMessage();
         if (StringUtil.isEmpty(message)) {
-            message = lastStep.getComment();
+            message = lastStep.getErrorMessage();
         }
         message = "Last test step message: '" + StringUtil.nullToEmpty(message) + "'.";
         // assert
-        assertEquals(message, expectedStatus, lastStep.getStatus());
+        assertEquals(message, expectedStatus, lastStep.getTestStatus());
     }
 
     /**
@@ -152,7 +148,7 @@ public abstract class GUITest extends LocalTestCase {
 
     // Get error message of the last test step
     private String getLastStepErrorMessage() {
-        return tCase.getLastTestStep().getErrorMessage();
+        return logListener.getLastTestStep().getErrorMessage();
     }
 
     protected String getTestPageUrl() {

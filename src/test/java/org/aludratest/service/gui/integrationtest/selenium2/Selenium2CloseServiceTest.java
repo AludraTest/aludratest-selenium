@@ -39,17 +39,17 @@ public class Selenium2CloseServiceTest extends GUITest {
     @Test
     public void closeAndOpenTest() throws Exception {
         tearDown();
-        assertNull(tCase.getLastFailed());
+        assertNull(logListener.getLastFailed());
         initializeAludra();
-        assertNull(tCase.getLastFailed());
+        assertNull(logListener.getLastFailed());
     }
 
     @Test
     public void doubleCloseTest() throws Exception {
         tearDown();
         tearDown();
-        assertNotNull(tCase.getLastFailed());
-        assertTrue(tCase.getLastFailed().getError() instanceof AutomationException);
+        assertNotNull(logListener.getLastFailed());
+        assertTrue(logListener.getLastFailed().getError() instanceof AutomationException);
     }
 
 }
