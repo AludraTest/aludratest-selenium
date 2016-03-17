@@ -261,4 +261,10 @@ public final class SeleniumWrapperConfiguration {
         return Boolean.valueOf(configuration.getStringValue("type.safemode", "false")).booleanValue();
     }
 
+    /** Returns, for Selenium 2, if z-Index checks shall be performed.
+     * 
+     * @return <code>true</code> if the z-Index checks shall be performed, <code>false</code> otherwise. */
+    public boolean isZIndexCheckEnabled() {
+        return Boolean.valueOf(configuration.getStringValue("zindex.check.enabled", "true")).booleanValue();
+    }
 }

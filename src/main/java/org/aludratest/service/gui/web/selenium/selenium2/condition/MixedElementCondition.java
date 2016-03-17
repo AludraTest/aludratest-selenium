@@ -34,10 +34,13 @@ public class MixedElementCondition extends WebElementCondition {
      * @param locator a locator for the element to check
      * @param locatorSupport
      * @param visible specifies if the element shall be checked for visibility
-     * @param enabled specified if the element shall be checked for enabled state */
-    public MixedElementCondition(GUIElementLocator locator, LocatorSupport locatorSupport, boolean visible, boolean enabled) {
+     * @param enabled specified if the element shall be checked for enabled state
+     * @param checkZIndex If <code>true</code>, z-Index check will be performed (performance penalty, but better accuracy for
+     *            covered elements). */
+    public MixedElementCondition(GUIElementLocator locator, LocatorSupport locatorSupport, boolean visible, boolean enabled,
+            boolean checkZIndex) {
         super(locator, locatorSupport);
-        this.zIndexSupport = new ZIndexSupport(locatorSupport);
+        this.zIndexSupport = checkZIndex ? new ZIndexSupport(locatorSupport) : null;
         this.visible = visible;
         this.enabled = enabled;
         this.message = null;
@@ -46,10 +49,11 @@ public class MixedElementCondition extends WebElementCondition {
     @Override
     protected WebElement applyOnElement(WebElement element) {
         // check if it is in foreground
-        if (!zIndexSupport.isInForeground(element)) {
+        if (zIndexSupport != null && !zIndexSupport.isInForeground(element)) {
             this.message = "Element not in foreground";
             return null;
         }
+
         // check visibility if required
         if (visible && !element.isDisplayed()) {
             // try to scroll to element

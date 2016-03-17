@@ -253,7 +253,8 @@ public class Selenium2Wrapper {
         if (actionPending) {
             waitUntilNotBusy();
         }
-        MixedElementCondition condition = new MixedElementCondition(locator, locatorSupport, visible, enabled);
+        MixedElementCondition condition = new MixedElementCondition(locator, locatorSupport, visible, enabled,
+                configuration.isZIndexCheckEnabled());
         try {
             WebElement element = waitFor(condition, configuration.getTimeout());
             highlight(locator);
@@ -808,7 +809,8 @@ public class Selenium2Wrapper {
     @SuppressWarnings("unchecked")
     public void waitUntilVisible(GUIElementLocator locator, long timeOutInMillis) {
         try {
-            waitFor(new MixedElementCondition(locator, locatorSupport, true, false), timeOutInMillis,
+            waitFor(new MixedElementCondition(locator, locatorSupport, true, false, configuration.isZIndexCheckEnabled()),
+                    timeOutInMillis,
                     NoSuchElementException.class);
         } catch (TimeoutException e) {
             throw new AutomationException("The element is not visible."); // NOSONAR
@@ -837,7 +839,8 @@ public class Selenium2Wrapper {
 
     @SuppressWarnings("unchecked")
     public void waitUntilInForeground(final GUIElementLocator locator, long timeOutInMillis) {
-        MixedElementCondition condition = new MixedElementCondition(locator, locatorSupport, false, false);
+        MixedElementCondition condition = new MixedElementCondition(locator, locatorSupport, false, false,
+                configuration.isZIndexCheckEnabled());
         try {
             waitFor(condition, timeOutInMillis, NoSuchElementException.class);
         }

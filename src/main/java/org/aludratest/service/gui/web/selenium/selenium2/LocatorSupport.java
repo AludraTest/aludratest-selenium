@@ -164,6 +164,11 @@ public class LocatorSupport {
      * @param child
      * @return */
     public WebElement getParent(final WebElement child) {
+        // return no parent for body
+        if ("body".equals(child.getTagName())) {
+            return null;
+        }
+
         WebElement parent = child.findElement(By.xpath(".."));
         return wrapElement(parent, new ElementLookup() {
             @Override

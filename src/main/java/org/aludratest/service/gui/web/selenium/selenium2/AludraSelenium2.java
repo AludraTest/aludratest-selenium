@@ -37,7 +37,8 @@ import org.slf4j.LoggerFactory;
         @ConfigProperty(name = "browser.arguments", type = String.class, description = "Space-separated list of arguments to pass to the browser. Currently, only the CHROME driver supports additional arguments.", required = false),
         @ConfigProperty(name = "tcp.timeout", type = int.class, description = "The TCP timeout to use. If the Selenium Client does not respond within this period of time, the request is aborted, and a SocketTimeoutException will be raised.", required = false, defaultValue = "5000"),
         @ConfigProperty(name = "screenshot.per.window", type = boolean.class, description = "If true, screenshots (in case of error) will be taken per browser window, instead of a full screenshot. This allows for execution of multiple Selenium clients on the same machine.", defaultValue = "false", required = false),
-        @ConfigProperty(name = "type.safemode", type = boolean.class, description = "If true, elements are clicked, and active element is used for typing (instead of directly sending keys to element).", defaultValue = "false", required = false) })
+        @ConfigProperty(name = "type.safemode", type = boolean.class, description = "If true, elements are clicked, and active element is used for typing (instead of directly sending keys to element).", defaultValue = "false", required = false),
+        @ConfigProperty(name = "zindex.check.enabled", type = boolean.class, description = "If true, a z-index check is performed before any element interaction is performed. This ensures the element is 'in foreground'. As this can cause performance decrease, you can disable it, but you may miss errors where web elements are covered by other elements.", defaultValue = "true", required = false) })
 public class AludraSelenium2 extends AbstractSeleniumService implements AludraWebGUI {
 
     private Selenium2Interaction interaction;
