@@ -254,4 +254,11 @@ public final class SeleniumWrapperConfiguration {
         return configuration.getIntValue("tcp.timeout", 5000);
     }
 
+    /** Returns, for Selenium 2, if the safe mode for typing shall be used.
+     * 
+     * @return <code>true</code> if the safe mode for typing shall be used, <code>false</code> otherwise. */
+    public boolean isTypeSafemode() {
+        return Boolean.valueOf(configuration.getStringValue("type.safemode", "false")).booleanValue();
+    }
+
 }

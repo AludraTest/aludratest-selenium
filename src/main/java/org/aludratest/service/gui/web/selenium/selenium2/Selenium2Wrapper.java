@@ -327,6 +327,13 @@ public class Selenium2Wrapper {
 
     public void type(GUIElementLocator locator, final String value, int taskCompletionTimeout) {
         WebElement element = doBeforeDelegate(locator, true, true, true);
+
+        if (configuration.isTypeSafemode()) {
+            // activate element with a click
+            element.click();
+            element = driver.switchTo().activeElement();
+        }
+
         // setValue instead of sendKeys to ensure field is reset, and to work with file component
         setValue(element, value);
         doAfterDelegate(taskCompletionTimeout, "type");

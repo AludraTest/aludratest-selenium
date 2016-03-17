@@ -30,13 +30,14 @@ import org.slf4j.LoggerFactory;
  * @author Volker Bergmann */
 @Implementation({ AludraWebGUI.class })
 @ConfigProperties({
-    @ConfigProperty(name = "use.local.proxy", type = boolean.class, description = "If true, a local HTTP proxy will be used to allow adding custom HTTP headers. If set to false, no proxy will be used, but the method addCustomHttpHeaderCommand will have no effect.", defaultValue = "true"),
-    @ConfigProperty(name = "proxy.port.min", type = int.class, description = "The lowest port number to use for the authenticating proxy.", defaultValue = "19600"),
-    @ConfigProperty(name = "driver", type = String.class, description = "The Selenium 2 driver name. Have a look at the org.aludratest.service.gui.web.selenium.selenium2.Drivers enumeration for potential values", defaultValue = "FIREFOX"),
-    @ConfigProperty(name = "use.remotedriver", type = boolean.class, description = "If true, use Selenium Remote Driver (talk to Selenium RC), otherwise, directly use driver class.", defaultValue = "false"),
+        @ConfigProperty(name = "use.local.proxy", type = boolean.class, description = "If true, a local HTTP proxy will be used to allow adding custom HTTP headers. If set to false, no proxy will be used, but the method addCustomHttpHeaderCommand will have no effect.", defaultValue = "true"),
+        @ConfigProperty(name = "proxy.port.min", type = int.class, description = "The lowest port number to use for the authenticating proxy.", defaultValue = "19600"),
+        @ConfigProperty(name = "driver", type = String.class, description = "The Selenium 2 driver name. Have a look at the org.aludratest.service.gui.web.selenium.selenium2.Drivers enumeration for potential values", defaultValue = "FIREFOX"),
+        @ConfigProperty(name = "use.remotedriver", type = boolean.class, description = "If true, use Selenium Remote Driver (talk to Selenium RC), otherwise, directly use driver class.", defaultValue = "false"),
         @ConfigProperty(name = "browser.arguments", type = String.class, description = "Space-separated list of arguments to pass to the browser. Currently, only the CHROME driver supports additional arguments.", required = false),
         @ConfigProperty(name = "tcp.timeout", type = int.class, description = "The TCP timeout to use. If the Selenium Client does not respond within this period of time, the request is aborted, and a SocketTimeoutException will be raised.", required = false, defaultValue = "5000"),
-        @ConfigProperty(name = "screenshot.per.window", type = boolean.class, description = "If true, screenshots (in case of error) will be taken per browser window, instead of a full screenshot. This allows for execution of multiple Selenium clients on the same machine.", defaultValue = "false", required = false) })
+        @ConfigProperty(name = "screenshot.per.window", type = boolean.class, description = "If true, screenshots (in case of error) will be taken per browser window, instead of a full screenshot. This allows for execution of multiple Selenium clients on the same machine.", defaultValue = "false", required = false),
+        @ConfigProperty(name = "type.safemode", type = boolean.class, description = "If true, elements are clicked, and active element is used for typing (instead of directly sending keys to element).", defaultValue = "false", required = false) })
 public class AludraSelenium2 extends AbstractSeleniumService implements AludraWebGUI {
 
     private Selenium2Interaction interaction;
