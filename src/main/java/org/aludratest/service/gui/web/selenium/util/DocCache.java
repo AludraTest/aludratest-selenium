@@ -15,8 +15,6 @@
  */
 package org.aludratest.service.gui.web.selenium.util;
 
-import java.io.StringReader;
-
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
@@ -25,9 +23,10 @@ import javax.xml.xpath.XPathFactory;
 import org.aludratest.exception.AutomationException;
 import org.aludratest.service.locator.element.XPathLocator;
 import org.aludratest.util.MostRecentUseCache;
+import org.jsoup.Jsoup;
+import org.jsoup.helper.W3CDom;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import org.w3c.tidy.Tidy;
 
 /** Utility class containing a static MRU cache for parsed HTML documents to enable faster XPath evaluations.
  * 
@@ -40,13 +39,7 @@ public final class DocCache {
     private static final MostRecentUseCache.Factory<String, Document> docFactory = new MostRecentUseCache.Factory<String, Document>() {
         @Override
         public Document create(String html) {
-            Tidy tidy = new Tidy();
-            tidy.setQuiet(true);
-            tidy.setShowWarnings(false);
-            tidy.setShowErrors(0);
-            tidy.setXmlOut(false);
-            Document document = tidy.parseDOM(new StringReader(html), null);
-            return document;
+            return new W3CDom().fromJsoup(Jsoup.parse(html));
         }
     };
 

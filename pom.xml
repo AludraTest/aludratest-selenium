@@ -62,11 +62,11 @@
 			<version>2.15</version>
 		</dependency>
 
-		<!-- for Selenium services (XPath lookup helper) -->
+		<!-- for HTML source code analysis and parsing -->
 		<dependency>
-			<groupId>net.sf.jtidy</groupId>
-			<artifactId>jtidy</artifactId>
-			<version>r938</version>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.9.1</version>
 		</dependency>
 
 		<dependency>
