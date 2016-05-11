@@ -55,7 +55,7 @@ public abstract class AbstractElementTest extends GUITest {
     public void isNotEnabledOnEnabledElement() {
         guiTestUIMap.dropDownBox().assertNotEnabled();
         checkLastStepStatus(TestStatus.FAILED);
-        checkLastStepErrorMessage("Element not expected to be enabled");
+        checkLastStepErrorMessage("Element enabled");
     }
 
     /**

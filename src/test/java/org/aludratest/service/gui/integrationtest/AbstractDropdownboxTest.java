@@ -61,7 +61,8 @@ public abstract class AbstractDropdownboxTest extends GUITest {
         String notExistingEntry = "Partner Short Name1";
         guiTestUIMap.dropDownBox().selectEntry(notExistingEntry);
         checkLastStepStatus(TestStatus.FAILEDAUTOMATION);
-        checkLastStepErrorMessage("The expected labels are not contained in the actual labels. Following Label(s) is/are missing: Partner Short Name1");
+        checkLastStepErrorMessage(
+                "The expected labels are not contained in the actual labels. Following Label is missing: Partner Short Name1");
     }
 
     /**
