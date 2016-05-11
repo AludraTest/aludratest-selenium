@@ -97,8 +97,11 @@ public class Selenium2Driver {
         return browserName;
     }
 
-    /** @return a freshly created instance of the related WebDriver class */
-    public WebDriver newLocalDriver() {
+    /** @param browserArguments Arguments to pass to the browser to launch. These may or may not be ignored, depending on the driver
+     *            implementation.
+     * 
+     * @return a freshly created instance of the related WebDriver class */
+    public WebDriver newLocalDriver(String[] browserArguments) {
         Constructor<?> cstr = null;
         try {
             cstr = driverClass.getConstructor(DesiredCapabilities.class);
@@ -118,8 +121,18 @@ public class Selenium2Driver {
             }
         }
 
+        // currently, browser arguments for LOCAL driver only supported for PhantomJS
+        DesiredCapabilities caps = new DesiredCapabilities(capabilities);
+        String[] args = (String[]) caps.getCapability("phantomjs.cli.args");
+        if (args != null && browserArguments != null && browserArguments.length > 0) {
+            String[] newArgs = new String[browserArguments.length + args.length];
+            System.arraycopy(args, 0, newArgs, 0, args.length);
+            System.arraycopy(browserArguments, 0, newArgs, args.length, browserArguments.length);
+            caps.setCapability("phantomjs.cli.args", newArgs);
+        }
+
         try {
-            return (WebDriver) cstr.newInstance(capabilities);
+            return (WebDriver) cstr.newInstance(caps);
         }
         catch (IllegalArgumentException e) {
             throw new WebDriverException(e);

@@ -57,6 +57,9 @@ public class LocalSeleniumResourceService implements SeleniumResourceService, Co
 
     private int defaultPort;
 
+    /** Used to store an "invalid config" flag during configuration. Only if the service is used, the exception is thrown. */
+    private boolean invalidConfig;
+
     @Override
     public String getPropertiesBaseName() {
         return "seleniumResourceService";
@@ -78,8 +81,7 @@ public class LocalSeleniumResourceService implements SeleniumResourceService, Co
 
         // assert that AludraTest number of threads matches executionHosts size
         if (aludraConfig.getNumberOfThreads() != executionHosts.size()) {
-            throw new AutomationException("Execution hosts size (" + executionHosts.size()
-                    + ") is not equal to number of threads of AludraTest (" + aludraConfig.getNumberOfThreads() + ")");
+            invalidConfig = true;
         }
 
         defaultPort = preferences.getIntValue("default.selenium.port", 4444);
@@ -95,6 +97,11 @@ public class LocalSeleniumResourceService implements SeleniumResourceService, Co
     /** acquires a proxy from the pool for exclusive use by a single client. */
     @Override
     public String acquire() {
+        if (invalidConfig) {
+            throw new AutomationException("Execution hosts size (" + executionHosts.size()
+                    + ") is not equal to number of threads of AludraTest (" + aludraConfig.getNumberOfThreads() + ")");
+        }
+
         try {
             return getHosts().acquire();
         } catch (InterruptedException e) {

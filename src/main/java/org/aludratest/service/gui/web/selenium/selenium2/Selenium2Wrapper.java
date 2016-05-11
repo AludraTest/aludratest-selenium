@@ -183,7 +183,7 @@ public class Selenium2Wrapper {
                 return driverEnum.newRemoteDriver(seleniumUrl, configuration.getBrowserArguments());
             }
             else {
-                return driverEnum.newLocalDriver();
+                return driverEnum.newLocalDriver(configuration.getBrowserArguments());
             }
         }
         catch (Exception e) {
