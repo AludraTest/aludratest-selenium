@@ -15,6 +15,13 @@
  */
 package org.aludratest.service.gui.web.selenium.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
@@ -23,10 +30,12 @@ import javax.xml.xpath.XPathFactory;
 import org.aludratest.exception.AutomationException;
 import org.aludratest.service.locator.element.XPathLocator;
 import org.aludratest.util.MostRecentUseCache;
+import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.helper.W3CDom;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /** Utility class containing a static MRU cache for parsed HTML documents to enable faster XPath evaluations.
  * 
@@ -39,7 +48,31 @@ public final class DocCache {
     private static final MostRecentUseCache.Factory<String, Document> docFactory = new MostRecentUseCache.Factory<String, Document>() {
         @Override
         public Document create(String html) {
-            return new W3CDom().fromJsoup(Jsoup.parse(html));
+            W3CDom helper = new W3CDom();
+            Document doc = helper.fromJsoup(Jsoup.parse(html));
+
+            // strip off namespaces
+            html = helper.asString(doc);
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(false);
+            dbf.setValidating(false);
+
+            try {
+                return dbf.newDocumentBuilder().parse(new ByteArrayInputStream(html.getBytes("UTF-8")));
+            }
+            catch (UnsupportedEncodingException e) {
+                throw new RuntimeException("UTF-8 not supported on this system");
+            }
+            catch (SAXException e) {
+                // ignore parse error; return doc (may cause problems)
+                return doc;
+            }
+            catch (IOException e) {
+                throw new RuntimeException("Could not read from memory");
+            }
+            catch (ParserConfigurationException e) {
+                throw new RuntimeException("No usable XML parser available on this system");
+            }
         }
     };
 
@@ -60,6 +93,11 @@ public final class DocCache {
         catch (XPathExpressionException e) {
             throw new AutomationException("Illegal XPath: " + xpath, e);
         }
+    }
+
+    public static void main(String[] args) throws IOException {
+        String html = FileUtils.readFileToString(new File("test.html"));
+        System.out.println(evalXPathInHTMLAsString("/html/head/title/text()", html));
     }
 
     public static String evalXPathInHTMLAsString(String xpath, String html) {
