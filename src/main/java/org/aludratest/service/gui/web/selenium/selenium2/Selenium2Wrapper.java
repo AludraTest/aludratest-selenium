@@ -269,7 +269,7 @@ public class Selenium2Wrapper {
         if (taskCompletionTimeout >= 0) {
             int timeout = (taskCompletionTimeout == 0 ? configuration.getTaskCompletionTimeout() : taskCompletionTimeout);
             String failureMessage = "After operation " + operation + "() the system remained busy exceeding the timeout of "
-                    + taskCompletionTimeout + " ms";
+                    + timeout + " ms";
             TaskCompletionUtil.waitForActivityAndCompletion(systemConnector, failureMessage, configuration.getTaskStartTimeout(),
                     timeout, configuration.getTaskPollingInterval());
         }
