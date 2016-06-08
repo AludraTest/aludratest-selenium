@@ -267,4 +267,11 @@ public final class SeleniumWrapperConfiguration {
     public boolean isZIndexCheckEnabled() {
         return Boolean.valueOf(configuration.getStringValue("zindex.check.enabled", "true")).booleanValue();
     }
+
+    /** Returns, for Selenium 2, the PhantomJS initialization JavaScript file.
+     * 
+     * @return The PhantomJS initialization JavaScript file, or <code>null</code> if not set. */
+    public String getPhantomJsInitScript() {
+        return configuration.getStringValue("phantomjs.init.script");
+    }
 }

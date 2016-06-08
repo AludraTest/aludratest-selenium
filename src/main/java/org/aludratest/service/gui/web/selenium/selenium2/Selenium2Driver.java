@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 /** Enumerates the available web drivers for Selenium 2.
  * @author Volker Bergmann */
-public class Selenium2Driver {
+final class Selenium2Driver {
 
     // Note: Needed to avoid 'enum' approach since this would make plexus' generate-metadata goal fail which considers a method
     // call in an enum constructor call to be a syntax error

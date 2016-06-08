@@ -16,6 +16,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<aludratest.version>3.1.0-SNAPSHOT</aludratest.version>
 		<aludratest.testing-harness.version>3.1.0-SNAPSHOT</aludratest.testing-harness.version>
+		<!-- should be set explicitly when local tests are executed -->
+		<phantomjs.binary.path>phantomjs</phantomjs.binary.path>
 	</properties>
 
 	<dependencies>
@@ -127,7 +129,6 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.17</version>
 				<configuration>
-					<argLine>-DperformLocalTests=${performLocalTests}</argLine>
 					<excludes>
 						<exclude>**/integrationtest/**</exclude>
 					</excludes>
@@ -140,7 +141,7 @@
 							<goal>test</goal>
 						</goals>
 						<configuration>
-							<argLine>-DperformLocalTests=${performLocalTests}</argLine>
+							<argLine>-DperformLocalTests=${performLocalTests} -Dphantomjs.binary.path=${phantomjs.binary.path}</argLine>
 							<excludes>
 								<exclude>**/*Selenium1*</exclude>
 							</excludes>

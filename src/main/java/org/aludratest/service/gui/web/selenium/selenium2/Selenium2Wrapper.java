@@ -17,6 +17,7 @@ package org.aludratest.service.gui.web.selenium.selenium2;
 
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -75,6 +76,7 @@ import org.aludratest.testcase.event.attachment.StringAttachment;
 import org.aludratest.util.data.helper.DataMarkerCheck;
 import org.aludratest.util.retry.RetryService;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.databene.commons.Validator;
 import org.openqa.selenium.By;
@@ -90,6 +92,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.CommandExecutor;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -732,6 +735,13 @@ public class Selenium2Wrapper {
         LOGGER.debug("open({})", url);
         try {
             driver.get(mapUrl(url));
+
+            // do PhantomJS initialization here, if desired
+            if (configuration.getPhantomJsInitScript() != null && (driver instanceof PhantomJSDriver)) {
+                Object result = ((PhantomJSDriver) driver)
+                        .executePhantomJS(FileUtils.readFileToString(new File(configuration.getPhantomJsInitScript())));
+                LOGGER.debug("Result of PhantomJS init script: " + result);
+            }
         }
         catch (TimeoutException e) {
             throw new PerformanceFailure("Timed out opening '" + url + "': " + e.getMessage(), e);
@@ -741,6 +751,10 @@ public class Selenium2Wrapper {
             if (message != null && message.contains("Timed out")) {
                 throw new PerformanceFailure("Timed out opening '" + url + "': " + e.getMessage(), e);
             }
+        }
+        catch (IOException e) {
+            // could not read init script
+            throw new AutomationException("Could not read PhantomJS init script " + configuration.getPhantomJsInitScript());
         }
     }
 
