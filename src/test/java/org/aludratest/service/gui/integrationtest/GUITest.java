@@ -73,7 +73,7 @@ public abstract class GUITest extends LocalTestCase {
         setContext(new AludraTestContextImpl(logListener = new DirectLogTestListener(), aludraTest.getServiceManager()));
 
         // configure aludra service with url.of.aut
-        System.setProperty("ALUDRATEST_CONFIG/seleniumWrapper/_testui/url.of.aut", getTestPageUrl());
+        System.setProperty("ALUDRATEST_CONFIG/webgui/_testui/url.of.aut", getTestPageUrl());
 
         // get aludra service
         serviceId = ComponentId.create(AludraWebGUI.class, "testui");

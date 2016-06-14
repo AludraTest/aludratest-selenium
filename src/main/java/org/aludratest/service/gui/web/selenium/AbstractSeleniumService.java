@@ -53,7 +53,7 @@ public abstract class AbstractSeleniumService extends AbstractConfigurableAludra
 
     @Override
     public final String getPropertiesBaseName() {
-        return "seleniumWrapper";
+        return "webgui";
     }
 
     @Override
