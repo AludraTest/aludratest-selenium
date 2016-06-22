@@ -16,7 +16,6 @@
 package org.aludratest.service.gui.web.selenium.util;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
@@ -30,9 +29,7 @@ import javax.xml.xpath.XPathFactory;
 import org.aludratest.exception.AutomationException;
 import org.aludratest.service.locator.element.XPathLocator;
 import org.aludratest.util.MostRecentUseCache;
-import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
-import org.jsoup.helper.W3CDom;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -93,11 +90,6 @@ public final class DocCache {
         catch (XPathExpressionException e) {
             throw new AutomationException("Illegal XPath: " + xpath, e);
         }
-    }
-
-    public static void main(String[] args) throws IOException {
-        String html = FileUtils.readFileToString(new File("test.html"));
-        System.out.println(evalXPathInHTMLAsString("/html/head/title/text()", html));
     }
 
     public static String evalXPathInHTMLAsString(String xpath, String html) {
