@@ -39,7 +39,6 @@ import org.aludratest.testcase.event.attachment.Attachment;
 import org.aludratest.testcase.event.attachment.BinaryAttachment;
 import org.aludratest.testcase.event.attachment.StringAttachment;
 import org.apache.commons.codec.binary.Base64;
-import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -850,6 +849,9 @@ public class SeleniumWrapper {
         }
     }
 
+    /** Waits for a window to be closed.
+     * @param windowLocator a locator for the window
+     * @param taskCompletionTimeout the maximum time to wait for completion */
     public void waitForWindowToBeClosed(final WindowLocator windowLocator, int taskCompletionTimeout) {
         ConditionCheck check = new ConditionCheck() {
             @Override
@@ -881,16 +883,14 @@ public class SeleniumWrapper {
         }
     }
 
+    /** Waits for an AJAX operation to complete.
+     * @param frameworkName the name of the framework
+     * @param maxWaitTime the maximum time to wait in milliseconds */
     public void waitForAjaxOperationEnd(String frameworkName, int maxWaitTime) {
         frameworkName = frameworkName.toLowerCase(Locale.US);
         if ("jquery".equals(frameworkName)) {
-            try {
-                retryUntilTrueOrTimeout(new org.aludratest.service.gui.web.selenium.selenium1.JQueryAjaxIdleCondition(selenium),
-                        maxWaitTime);
-            }
-            catch (TimeoutException e) {
-                throw new PerformanceFailure("AJAX operation was not finished within timeout of " + maxWaitTime + " ms");
-            }
+            retryUntilTrueOrTimeout(new org.aludratest.service.gui.web.selenium.selenium1.JQueryAjaxIdleCondition(selenium),
+                    maxWaitTime);
         }
         else {
             throw new AutomationException("Unsupported JavaScript framework for AJAX check: " + frameworkName);
