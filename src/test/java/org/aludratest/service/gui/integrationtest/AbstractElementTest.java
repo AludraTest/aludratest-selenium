@@ -139,6 +139,12 @@ public abstract class AbstractElementTest extends GUITest {
     }
 
     @Test
+    public void assertNotVisibleOnNonExistingElement() {
+        guiTestUIMap.notExistingButton().assertNotVisible();
+        checkLastStepStatus(TestStatus.PASSED);
+    }
+
+    @Test
     public void assertNotVisibleOnVisibleElement() {
         guiTestUIMap.findButton().assertNotVisible();
         checkLastStepStatus(TestStatus.FAILED);
