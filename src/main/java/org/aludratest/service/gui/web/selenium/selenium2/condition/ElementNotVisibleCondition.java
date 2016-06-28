@@ -19,20 +19,20 @@ import org.aludratest.service.gui.web.selenium.selenium2.LocatorSupport;
 import org.aludratest.service.locator.element.GUIElementLocator;
 import org.openqa.selenium.WebElement;
 
-public class ElementNotVisibleCondition extends WebElementCondition {
+public class ElementNotVisibleCondition extends NegativeWebElementCondition {
 
     public ElementNotVisibleCondition(GUIElementLocator locator, LocatorSupport locatorSupport) {
         super(locator, locatorSupport);
     }
 
     @Override
-    protected WebElement applyOnElement(WebElement element) {
+    protected Boolean applyOnElement(WebElement element) {
         if (element.isDisplayed()) {
             message = "The element is visible.";
             return null;
         }
 
-        return element;
+        return Boolean.TRUE;
     }
 
 }
