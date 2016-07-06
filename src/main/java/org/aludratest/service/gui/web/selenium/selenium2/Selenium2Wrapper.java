@@ -1086,28 +1086,31 @@ public class Selenium2Wrapper {
 
     private String captureScreenshotToString() {
         // use Selenium1 interface to capture full screen
-        String url = seleniumUrl.toString();
-        Pattern p = Pattern.compile("(http(s)?://.+)/wd/hub(/?)");
-        Matcher matcher = p.matcher(url);
-        if (matcher.matches()) {
-            String screenshotUrl = matcher.group(1);
-            screenshotUrl += (screenshotUrl.endsWith("/") ? "" : "/") + "selenium-server/driver/?cmd=captureScreenshotToString";
-            InputStream in = null;
-            try {
-                in = new URL(screenshotUrl).openStream();
-                // read away "OK,"
-                if (in.read(new byte[3]) < 3) {
-                    throw new EOFException();
+        if (seleniumUrl != null) {
+            String url = seleniumUrl.toString();
+            Pattern p = Pattern.compile("(http(s)?://.+)/wd/hub(/?)");
+            Matcher matcher = p.matcher(url);
+            if (matcher.matches()) {
+                String screenshotUrl = matcher.group(1);
+                screenshotUrl += (screenshotUrl.endsWith("/") ? "" : "/")
+                        + "selenium-server/driver/?cmd=captureScreenshotToString";
+                InputStream in = null;
+                try {
+                    in = new URL(screenshotUrl).openStream();
+                    // read away "OK,"
+                    if (in.read(new byte[3]) < 3) {
+                        throw new EOFException();
+                    }
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    IOUtils.copy(in, baos);
+                    return new String(baos.toByteArray(), "UTF-8");
                 }
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                IOUtils.copy(in, baos);
-                return new String(baos.toByteArray(), "UTF-8");
-            }
-            catch (IOException e) {
-                // OK, fallthrough to Selenium 2 method
-            }
-            finally {
-                IOUtils.closeQuietly(in);
+                catch (IOException e) {
+                    // OK, fallthrough to Selenium 2 method
+                }
+                finally {
+                    IOUtils.closeQuietly(in);
+                }
             }
         }
 
