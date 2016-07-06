@@ -4,7 +4,7 @@ sudo: false
 
 before_script:
 - echo "#!/bin/bash" > phantomjs.sh
-- echo "phantomjs $*" >> phantomjs.sh
+- echo 'phantomjs "$@"' >> phantomjs.sh
 - chmod +x phantomjs.sh	
 
 script: mvn verify site -DperformLocalTests=true -DaludraTest.environment=PHANTOMJS -Dphantomjs.binary.path=phantomjs.sh
