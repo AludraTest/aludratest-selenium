@@ -1253,10 +1253,10 @@ public class Selenium2Wrapper {
 
     private void setValue(WebElement element, String value) {
         LOGGER.debug("setValue(WebElement, {})", value);
-        sendKeys(element, Keys.END);
         String text;
         int tryCounter = 3;
         while (tryCounter > 0 && !DataMarkerCheck.isNull(text = getValue(element))) {
+            sendKeys(element, Keys.END);
             int length = text.length();
             String[] arr = new String[length];
             for (int i = 0; i < length; i++) {
