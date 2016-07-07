@@ -135,7 +135,9 @@ public abstract class GUITest extends LocalTestCase {
      *            expected error message pattern (regular expression)
      */
     protected void checkLastStepErrorMessageMatches(String expectedErrorMessagePattern) {
-        Assert.assertTrue(getLastStepErrorMessage().matches(expectedErrorMessagePattern));
+        String lastErrorMessage = getLastStepErrorMessage();
+        Assert.assertTrue("Message " + lastErrorMessage + " does not match pattern " + expectedErrorMessagePattern,
+                lastErrorMessage.matches(expectedErrorMessagePattern));
     }
 
     // Open test page
