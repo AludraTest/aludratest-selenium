@@ -79,6 +79,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.databene.commons.Validator;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -88,6 +89,7 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -1073,6 +1075,21 @@ public class Selenium2Wrapper {
                 result.add(new BinaryAttachment("Screenshot-" + (title == null ? "" + (++index) : title), decodedData,
                         configuration.getScreenshotAttachmentExtension()));
             }
+            catch (UnhandledAlertException e) {
+                // examine alert; make screenshot of whole screen
+                try {
+                    Alert alert = driver.switchTo().alert();
+                    result.add(new StringAttachment("Unexpected Alert Text", alert.getText(), "txt"));
+                    String data = captureScreenshotToString();
+                    byte[] decodedData = base64.decode(data);
+                    String title = "Full Screenshot";
+                    result.add(new BinaryAttachment(title, decodedData, configuration.getScreenshotAttachmentExtension()));
+                }
+                catch (Exception ee) {
+                    // wow, that's bad. ignore it here.
+                    LOGGER.warn("Could not examine unhandled alert in active window; no screenshot available", ee);
+                }
+            }
             catch (UnsupportedOperationException e) {
                 // OK, no screenshot available
                 LOGGER.warn("Web driver is not able to take screenshots; no screenshots available");
@@ -1083,6 +1100,7 @@ public class Selenium2Wrapper {
 
         return result;
     }
+
 
     private String captureScreenshotToString() {
         // use Selenium1 interface to capture full screen
