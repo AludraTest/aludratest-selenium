@@ -98,6 +98,7 @@ import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.CommandExecutor;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.ScreenshotException;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.Select;
 import org.slf4j.Logger;
@@ -1090,9 +1091,25 @@ public class Selenium2Wrapper {
                     LOGGER.warn("Could not examine unhandled alert in active window; no screenshot available", ee);
                 }
             }
+            catch (ScreenshotException e) {
+                // check if there is a NoSuchWindowException
+                if (e.getCause() instanceof NoSuchWindowException) {
+                    LOGGER.warn("Window has been closed before being able to make screenshot");
+                }
+                else {
+                    LOGGER.error("Could not take Window screenshot", e);
+                }
+            }
+            catch (NoSuchWindowException e) {
+                LOGGER.warn("Window has been closed before being able to make screenshot");
+            }
+
             catch (UnsupportedOperationException e) {
                 // OK, no screenshot available
                 LOGGER.warn("Web driver is not able to take screenshots; no screenshots available");
+            }
+            catch (Throwable t) {
+                LOGGER.error("Could not take Window screenshot", t);
             }
         }
 
