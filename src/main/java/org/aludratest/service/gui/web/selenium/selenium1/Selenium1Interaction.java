@@ -317,4 +317,11 @@ public class Selenium1Interaction extends AbstractSeleniumAction implements WebG
         return DocCache.evalXPathInHTMLAsString(xpath, html);
     }
 
+    @Override
+    public String captureActiveWindow() {
+        // funnily, the implementation in the Selenium1Wrapper is exactly swapped. But we leave it for now,
+        // so this is correct!
+        return wrapper.getScreenshotOfTheWholeScreen().getFileDataAsBase64String();
+    }
+
 }
