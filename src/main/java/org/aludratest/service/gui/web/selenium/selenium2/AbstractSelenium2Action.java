@@ -72,6 +72,11 @@ public abstract class AbstractSelenium2Action implements Action {
             byte[] data = Base64.decodeBase64(contents.substring(contents.indexOf(':') + 1));
             return Collections.<Attachment> singletonList(new BinaryAttachment(label, data, suffix));
         }
+        if ("Active Window Screenshot".equals(label)) {
+            String contents = object.toString();
+            byte[] data = Base64.decodeBase64(contents);
+            return Collections.<Attachment> singletonList(new BinaryAttachment(label, data, "png"));
+        }
 
         throw new TechnicalException("Unsupported attachment: " + label);
     }

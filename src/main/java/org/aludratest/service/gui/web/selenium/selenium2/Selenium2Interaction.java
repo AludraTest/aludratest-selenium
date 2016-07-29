@@ -244,6 +244,11 @@ public class Selenium2Interaction extends AbstractSelenium2Action implements Web
     }
 
     @Override
+    public String captureActiveWindow() {
+        return wrapper.captureActiveWindowScreenshotToString();
+    }
+
+    @Override
     public void waitForAjaxOperationEnd(String frameworkName, int maxWaitTime) {
         wrapper.waitForAjaxOperationEnd(frameworkName, maxWaitTime);
     }
