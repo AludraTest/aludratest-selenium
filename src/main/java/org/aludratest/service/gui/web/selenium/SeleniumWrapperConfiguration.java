@@ -274,4 +274,12 @@ public final class SeleniumWrapperConfiguration {
     public String getPhantomJsInitScript() {
         return configuration.getStringValue("phantomjs.init.script");
     }
+
+    /** Returns, for Selenium 2, the name of the AJAX framework to auto-check for pending operations, if any.
+     * 
+     * @return The name of the AJAX framework to auto-check for pending operations, or <code>null</code> to not perform any
+     *         checks. */
+    public String getAutoWaitAjaxFrameworkName() {
+        return configuration.getStringValue("auto.wait.for.ajax.framework");
+    }
 }
