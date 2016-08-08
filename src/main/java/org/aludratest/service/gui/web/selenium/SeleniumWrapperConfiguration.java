@@ -274,4 +274,20 @@ public final class SeleniumWrapperConfiguration {
     public String getPhantomJsInitScript() {
         return configuration.getStringValue("phantomjs.init.script");
     }
+
+    /** Returns, for Selenium 2, the name of the AJAX framework to auto-check for pending operations, if any.
+     * 
+     * @return The name of the AJAX framework to auto-check for pending operations, or <code>null</code> to not perform any
+     *         checks. */
+    public String getAutoWaitAjaxFrameworkName() {
+        return configuration.getStringValue("auto.wait.for.ajax.framework");
+    }
+
+    /** Returns, for Selenium 2, the number of milliseconds to wait after typing into an input component and before tabbing out.
+     * 
+     * @return The number of milliseonds to wait after typing into an input component and before tabbing out. 0 indicates not to
+     *         wait. */
+    public int getTypeWaitBeforeTab() {
+        return configuration.getIntValue("type.wait.before.tab", 0);
+    }
 }

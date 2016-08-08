@@ -45,6 +45,7 @@ import org.aludratest.service.gui.web.selenium.SystemDownloadProvider;
 import org.aludratest.service.gui.web.selenium.httpproxy.AuthenticatingHttpProxy;
 import org.aludratest.service.gui.web.selenium.selenium2.condition.AbstractAjaxIdleCondition;
 import org.aludratest.service.gui.web.selenium.selenium2.condition.AnyDropDownOptions;
+import org.aludratest.service.gui.web.selenium.selenium2.condition.DojoPre17AjaxIdleCondition;
 import org.aludratest.service.gui.web.selenium.selenium2.condition.DropDownBoxOptionLabelsPresence;
 import org.aludratest.service.gui.web.selenium.selenium2.condition.DropDownBoxOptionValuesPresence;
 import org.aludratest.service.gui.web.selenium.selenium2.condition.DropDownOptionLocatable;
@@ -78,6 +79,7 @@ import org.aludratest.util.retry.RetryService;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.databene.commons.StringUtil;
 import org.databene.commons.Validator;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
@@ -282,11 +284,23 @@ public class Selenium2Wrapper {
     }
 
     private void waitUntilNotBusy() {
+        // perform AJAX check, if requested. Subtract from task completion timeout
+        int originalTimeout = configuration.getTaskCompletionTimeout();
+        int taskCompletionTimeout = originalTimeout;
+        if (!StringUtil.isEmpty(configuration.getAutoWaitAjaxFrameworkName())) {
+            long start = System.currentTimeMillis();
+            waitForAjaxOperationEnd(configuration.getAutoWaitAjaxFrameworkName(), taskCompletionTimeout);
+            taskCompletionTimeout -= System.currentTimeMillis() - start;
+            if (taskCompletionTimeout <= 0) {
+                // ok, add a second to throw correct error message below
+                taskCompletionTimeout = 1000;
+            }
+        }
+
         if (this.systemConnector != null) {
-            int taskCompletionTimeout = configuration.getTaskCompletionTimeout();
             TaskCompletionUtil.waitUntilNotBusy(this.systemConnector, taskCompletionTimeout,
-                    configuration.getTaskPollingInterval(), "System not available within the timeout of " + taskCompletionTimeout
-                    + " ms");
+                    configuration.getTaskPollingInterval(),
+                    "System not available within the timeout of " + originalTimeout + " ms");
         }
     }
 
@@ -1017,6 +1031,9 @@ public class Selenium2Wrapper {
         else if ("icefaces".equals(frameworkName)) {
             condition = new IceFacesAjaxIdleCondition();
         }
+        else if ("dojopre17".equals(frameworkName)) {
+            condition = new DojoPre17AjaxIdleCondition();
+        }
 
         if (condition != null) {
             try {
@@ -1304,6 +1321,15 @@ public class Selenium2Wrapper {
             throw new AutomationException("Could not clear input field. Maybe covered by other component?");
         }
         sendKeys(element, value);
+
+        if (configuration.getTypeWaitBeforeTab() > 0) {
+            try {
+                Thread.sleep(configuration.getTypeWaitBeforeTab());
+            }
+            catch (InterruptedException e) {
+                return;
+            }
+        }
 
         try {
             sendKeys(element, Keys.TAB);
