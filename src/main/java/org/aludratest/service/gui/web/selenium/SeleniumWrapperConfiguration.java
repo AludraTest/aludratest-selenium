@@ -282,4 +282,12 @@ public final class SeleniumWrapperConfiguration {
     public String getAutoWaitAjaxFrameworkName() {
         return configuration.getStringValue("auto.wait.for.ajax.framework");
     }
+
+    /** Returns, for Selenium 2, the number of milliseconds to wait after typing into an input component and before tabbing out.
+     * 
+     * @return The number of milliseonds to wait after typing into an input component and before tabbing out. 0 indicates not to
+     *         wait. */
+    public int getTypeWaitBeforeTab() {
+        return configuration.getIntValue("type.wait.before.tab", 0);
+    }
 }

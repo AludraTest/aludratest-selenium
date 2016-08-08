@@ -351,7 +351,7 @@ public class Selenium2Wrapper {
 
         if (configuration.isTypeSafemode()) {
             // activate element with a click
-            click(locator, "click", 0);
+            element.click();
             element = driver.switchTo().activeElement();
         }
 
@@ -1321,6 +1321,15 @@ public class Selenium2Wrapper {
             throw new AutomationException("Could not clear input field. Maybe covered by other component?");
         }
         sendKeys(element, value);
+
+        if (configuration.getTypeWaitBeforeTab() > 0) {
+            try {
+                Thread.sleep(configuration.getTypeWaitBeforeTab());
+            }
+            catch (InterruptedException e) {
+                return;
+            }
+        }
 
         try {
             sendKeys(element, Keys.TAB);
