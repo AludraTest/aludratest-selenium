@@ -71,6 +71,13 @@
 			<artifactId>jsoup</artifactId>
 			<version>1.9.1</version>
 		</dependency>
+		
+		<!-- for REST communication with ACM server -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.1</version>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
