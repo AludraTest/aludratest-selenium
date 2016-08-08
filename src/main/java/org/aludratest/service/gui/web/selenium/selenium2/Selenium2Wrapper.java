@@ -1179,7 +1179,7 @@ public class Selenium2Wrapper {
         }
     }
 
-    private String captureActiveWindowScreenshotToString() {
+    public String captureActiveWindowScreenshotToString() {
         WebDriver screenshotDriver;
         if (RemoteWebDriver.class.isAssignableFrom(driver.getClass())) {
             screenshotDriver = new Augmenter().augment(driver);
