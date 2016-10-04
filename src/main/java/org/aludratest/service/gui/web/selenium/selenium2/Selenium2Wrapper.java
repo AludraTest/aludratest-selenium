@@ -1077,8 +1077,25 @@ public class Selenium2Wrapper {
 
         Base64 base64 = new Base64();
 
-        Set<String> windowHandles = getWindowHandles();
-        String activeHandle = getWindowHandle();
+        Set<String> windowHandles;
+        String activeHandle;
+        try {
+            windowHandles = getWindowHandles();
+            activeHandle = getWindowHandle();
+        }
+        catch (NoSuchWindowException e) {
+            LOGGER.warn("Window has been closed before being able to make screenshot");
+            return Collections.emptyList();
+        }
+        catch (ScreenshotException e) {
+            if (e.getCause() instanceof NoSuchWindowException) {
+                LOGGER.warn("Window has been closed before being able to make screenshot");
+            }
+            else {
+                LOGGER.error("Could not take Window screenshot", e);
+            }
+            return Collections.emptyList();
+        }
 
         List<Attachment> result = new ArrayList<Attachment>();
 
