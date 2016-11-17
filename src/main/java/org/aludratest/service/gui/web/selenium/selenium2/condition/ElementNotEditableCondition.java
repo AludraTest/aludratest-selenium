@@ -35,14 +35,17 @@ public class ElementNotEditableCondition extends ElementEnabledCondition {
         }
 
         // element must be text based input - if not, treat as "not editable"
-        if (!"input".equalsIgnoreCase(element.getTagName())) {
+        String tagName = element.getTagName();
+        if (!"input".equalsIgnoreCase(tagName) && !"textarea".equalsIgnoreCase(tagName)) {
             return element;
         }
 
-        String tp = element.getAttribute("type");
-        // all of these do NOT have a textual input representation
-        if (tp == null || tp.toLowerCase(Locale.US).matches("button|checkbox|color|hidden|image|radio|reset|search|submit")) {
-            return element;
+        if ("input".equalsIgnoreCase(tagName)) {
+            String tp = element.getAttribute("type");
+            // all of these do NOT have a textual input representation
+            if (tp == null || tp.toLowerCase(Locale.US).matches("button|checkbox|color|hidden|image|radio|reset|search|submit")) {
+                return element;
+            }
         }
 
         String roAttr = element.getAttribute("readonly");
