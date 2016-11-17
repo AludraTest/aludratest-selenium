@@ -83,6 +83,9 @@ public class GUITestUIMap extends UIMap {
     public static final GUIElementLocator HOVER_TEXT_ID = new IdLocator("hover_text");
     public static final GUIElementLocator HOVER_VALUE_ID = new IdLocator("hover_hideshow");
 
+    public static final GUIElementLocator TEXTAREA_ID = new IdLocator("test_textarea");
+    public static final GUIElementLocator TEXTAREA_READONLY_ID = new IdLocator("test_textarea_readonly");
+
     public GUITestUIMap(AludraWebGUI aludraGUI) {
         super(aludraGUI);
     }
@@ -198,4 +201,13 @@ public class GUITestUIMap extends UIMap {
     public Label hoverValue() {
         return aludraGUI.getComponentFactory().createLabel(HOVER_VALUE_ID);
     }
+
+    public InputField textArea() {
+        return aludraGUI.getComponentFactory().createInputField(TEXTAREA_ID);
+    }
+
+    public InputField textAreaReadOnly() {
+        return aludraGUI.getComponentFactory().createInputField(TEXTAREA_READONLY_ID);
+    }
+
 }
