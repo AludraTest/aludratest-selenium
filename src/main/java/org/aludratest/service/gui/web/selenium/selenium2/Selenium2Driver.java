@@ -196,6 +196,7 @@ final class Selenium2Driver {
         DesiredCapabilities caps = DesiredCapabilities.chrome();
         ChromeOptions opts = new ChromeOptions();
         opts.addArguments("--disable-extensions");
+        opts.addArguments("-disable-extensions");
         caps.setCapability(ChromeOptions.CAPABILITY, opts);
         return caps;
     }
