@@ -28,6 +28,7 @@ import org.aludratest.service.locator.option.OptionLocator;
 import org.aludratest.service.locator.window.TitleLocator;
 import org.aludratest.service.locator.window.WindowLocator;
 import org.aludratest.util.DataUtil;
+import org.apache.commons.lang.NotImplementedException;
 import org.databene.commons.StringUtil;
 import org.w3c.dom.NodeList;
 
@@ -323,5 +324,10 @@ public class Selenium1Interaction extends AbstractSeleniumAction implements WebG
         // so this is correct!
         return wrapper.getScreenshotOfTheWholeScreen().getFileDataAsBase64String();
     }
+
+    @Override
+    public void keysPress(CharSequence... keysToPress) {
+        throw new NotImplementedException();         
+    }  
 
 }

@@ -712,6 +712,11 @@ public class Selenium2Wrapper {
         LOGGER.debug("keyPress({})", keycode);
         sendKeys(driver.switchTo().activeElement(), String.valueOf((char) keycode));
     }
+    
+    public void keysPress(CharSequence... keycodes) {
+        LOGGER.debug("keysPress({})", keycodes);
+        sendKeys(driver.switchTo().activeElement(), Keys.chord(keycodes));
+    }
 
     public void close() {
         LOGGER.debug("close()");
