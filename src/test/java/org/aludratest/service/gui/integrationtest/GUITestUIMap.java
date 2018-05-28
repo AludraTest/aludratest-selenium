@@ -209,5 +209,9 @@ public class GUITestUIMap extends UIMap {
     public InputField textAreaReadOnly() {
         return aludraGUI.getComponentFactory().createInputField(TEXTAREA_READONLY_ID);
     }
+    
+    public void pressKeys(CharSequence... keysToPress) {
+        aludraGUI.perform().keysPress(keysToPress);
+    }
 
 }

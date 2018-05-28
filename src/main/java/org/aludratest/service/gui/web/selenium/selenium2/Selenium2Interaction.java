@@ -299,4 +299,9 @@ public class Selenium2Interaction extends AbstractSelenium2Action implements Web
         return DocCache.evalXPathInHTMLAsString(xpath, html);
     }
 
+    @Override
+    public void keysPress(CharSequence... keysToPress) {
+        wrapper.keysPress(keysToPress);        
+    }
+
 }
