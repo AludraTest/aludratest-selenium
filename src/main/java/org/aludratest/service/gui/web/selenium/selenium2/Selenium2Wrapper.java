@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -83,6 +84,7 @@ import org.databene.commons.StringUtil;
 import org.databene.commons.Validator;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
@@ -1467,6 +1469,14 @@ public class Selenium2Wrapper {
 
         // otherwise, throw a technical exception
         throw new TechnicalException("Unknown exception when clicking element", origException);
+    }
+
+    public void deleteCookieNamed(String name) {
+    	driver.manage().deleteCookieNamed(name);        
+    }
+
+    public void addCookie(String name, String value, String domain, String path, Date expiry) {
+    	driver.manage().addCookie(new Cookie(name, value, domain, path, expiry));        
     }
 
 }

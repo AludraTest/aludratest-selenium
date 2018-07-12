@@ -15,6 +15,7 @@
  */
 package org.aludratest.service.gui.web.selenium.selenium2;
 
+import java.util.Date;
 import java.util.Map;
 
 import org.aludratest.exception.AutomationException;
@@ -302,6 +303,16 @@ public class Selenium2Interaction extends AbstractSelenium2Action implements Web
     @Override
     public void keysPress(CharSequence... keysToPress) {
         wrapper.keysPress(keysToPress);        
+    }
+
+    @Override
+    public void addCookie(String name, String value, String domain, String path, Date expiry) {
+        wrapper.addCookie(name, value, domain, path, expiry);
+    }
+
+    @Override
+    public void deleteCookieNamed(String name) {
+        wrapper.deleteCookieNamed(name);        
     }
 
 }
