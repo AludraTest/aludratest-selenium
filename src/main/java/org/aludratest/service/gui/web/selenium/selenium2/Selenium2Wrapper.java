@@ -1477,8 +1477,12 @@ public class Selenium2Wrapper {
 
     public void addCookie(String name, String value, String domain, String path, int expiry) {
         Calendar cal = Calendar.getInstance();
+        if (-1 >= expiry) {
+            driver.manage().addCookie(new Cookie(name, value, domain, path, null));
+            return;
+        }
         cal.add(Calendar.SECOND, expiry);
-    	driver.manage().addCookie(new Cookie(name, value, domain, path, cal.getTime()));        
+        driver.manage().addCookie(new Cookie(name, value, domain, path, cal.getTime()));
     }
 
 }
