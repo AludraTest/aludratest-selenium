@@ -15,8 +15,6 @@
  */
 package org.aludratest.service.gui.integrationtest;
 
-import java.util.Date;
-
 import org.aludratest.service.gui.component.Button;
 import org.aludratest.service.gui.component.Checkbox;
 import org.aludratest.service.gui.component.Dropdownbox;
@@ -216,7 +214,7 @@ public class GUITestUIMap extends UIMap {
         aludraGUI.perform().keysPress(keysToPress);
     }
 
-    public void addCookie(String name, String value, String domain, String path, Date expiry) {
+    public void addCookie(String name, String value, String domain, String path, int expiry) {
         aludraGUI.perform().addCookie(name, value, domain, path, expiry);
     }
     

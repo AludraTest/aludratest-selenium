@@ -15,8 +15,6 @@
  */
 package org.aludratest.service.gui.web.selenium.selenium1;
 
-import java.util.Date;
-
 import org.aludratest.exception.AutomationException;
 import org.aludratest.exception.FunctionalFailure;
 import org.aludratest.service.gui.web.WebGUIInteraction;
@@ -333,7 +331,7 @@ public class Selenium1Interaction extends AbstractSeleniumAction implements WebG
     }
 
     @Override
-    public void addCookie(String name, String value, String domain, String path, Date expiry) {
+    public void addCookie(String name, String value, String domain, String path, int expiry) {
         throw new NotImplementedException();        
     }
 

@@ -1,8 +1,5 @@
 package org.aludratest.service.gui.integrationtest.selenium2;
 
-import java.util.Calendar;
-import java.util.Date;
-
 import org.aludratest.service.gui.integrationtest.GUITest;
 import org.junit.Test;
 
@@ -17,10 +14,7 @@ public class Selenium2CookieTest extends GUITest {
      */
     @Test
     public void assertAddCookie() {
-        Calendar cal = Calendar.getInstance(); // creates calendar
-        cal.setTime(new Date()); // sets calendar time/date
-        cal.add(Calendar.HOUR_OF_DAY, 1); // adds one hour
-        guiTestUIMap.addCookie("MONI_SYNTHE_ACTION", "FIND", ".hamburgsud.com", "/", cal.getTime());
+        guiTestUIMap.addCookie("MONI_SYNTHE_ACTION", "FIND", ".hamburgsud.com", "/", 60*60);
     }
     
     /**

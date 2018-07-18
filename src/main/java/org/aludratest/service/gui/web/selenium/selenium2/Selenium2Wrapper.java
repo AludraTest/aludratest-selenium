@@ -22,9 +22,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -1475,8 +1475,10 @@ public class Selenium2Wrapper {
     	driver.manage().deleteCookieNamed(name);        
     }
 
-    public void addCookie(String name, String value, String domain, String path, Date expiry) {
-    	driver.manage().addCookie(new Cookie(name, value, domain, path, expiry));        
+    public void addCookie(String name, String value, String domain, String path, int expiry) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.SECOND, expiry);
+    	driver.manage().addCookie(new Cookie(name, value, domain, path, cal.getTime()));        
     }
 
 }
