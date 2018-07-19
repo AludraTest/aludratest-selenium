@@ -328,6 +328,16 @@ public class Selenium1Interaction extends AbstractSeleniumAction implements WebG
     @Override
     public void keysPress(CharSequence... keysToPress) {
         throw new NotImplementedException();         
+    }
+
+    @Override
+    public void addCookie(String name, String value, String domain, String path, int expiry) {
+        throw new NotImplementedException();        
+    }
+
+    @Override
+    public void deleteCookieNamed(String name) {
+        throw new NotImplementedException();        
     }  
 
 }

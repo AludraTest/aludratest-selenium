@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -83,6 +84,7 @@ import org.databene.commons.StringUtil;
 import org.databene.commons.Validator;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
@@ -1467,6 +1469,20 @@ public class Selenium2Wrapper {
 
         // otherwise, throw a technical exception
         throw new TechnicalException("Unknown exception when clicking element", origException);
+    }
+
+    public void deleteCookieNamed(String name) {
+    	driver.manage().deleteCookieNamed(name);        
+    }
+
+    public void addCookie(String name, String value, String domain, String path, int expiry) {
+        if (-1 >= expiry) {
+            driver.manage().addCookie(new Cookie(name, value, domain, path, null));
+            return;
+        }
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.SECOND, expiry);
+        driver.manage().addCookie(new Cookie(name, value, domain, path, cal.getTime()));
     }
 
 }

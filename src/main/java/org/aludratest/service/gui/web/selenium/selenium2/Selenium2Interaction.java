@@ -304,4 +304,14 @@ public class Selenium2Interaction extends AbstractSelenium2Action implements Web
         wrapper.keysPress(keysToPress);        
     }
 
+    @Override
+    public void addCookie(String name, String value, String domain, String path, int expiry) {
+        wrapper.addCookie(name, value, domain, path, expiry);
+    }
+
+    @Override
+    public void deleteCookieNamed(String name) {
+        wrapper.deleteCookieNamed(name);        
+    }
+
 }
