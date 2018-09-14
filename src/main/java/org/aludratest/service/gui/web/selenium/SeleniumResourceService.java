@@ -15,6 +15,8 @@
  */
 package org.aludratest.service.gui.web.selenium;
 
+import java.net.URL;
+
 import org.aludratest.config.InternalComponent;
 
 /**
@@ -25,16 +27,11 @@ import org.aludratest.config.InternalComponent;
 public interface SeleniumResourceService {
 
     /** Acquires a server and reserves it for the client.
-     * @return the URL of the server (could be host name only, or host:port). */
-    String acquire();
+     * @return the URL of the server. */
+    URL acquire();
 
     /** Releases a server and makes it available to other clients again.
      * @param server The URL of the server to release, as retrieved from {@link #acquire()}. */
-    void release(String server);
-
-    /**
-     * @return the number of configured hosts
-     */
-    int getHostCount();
+    void release(URL server);
 
 }

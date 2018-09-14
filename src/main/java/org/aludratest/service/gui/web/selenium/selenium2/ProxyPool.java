@@ -15,47 +15,53 @@
  */
 package org.aludratest.service.gui.web.selenium.selenium2;
 
-import org.aludratest.service.gui.web.selenium.httpproxy.AuthenticatingHttpProxy;
-import org.aludratest.util.ObjectPool;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Creates and manages a pool of {@link AuthenticatingHttpProxy} instances
- * using an {@link ObjectPool}.
+import org.aludratest.service.gui.web.selenium.httpproxy.AuthenticatingHttpProxy;
+
+/** Creates and manages a pool of {@link AuthenticatingHttpProxy} instances.
+ *
  * @author Volker Bergmann
- */
+ * @author falbrech */
 public class ProxyPool {
 
-    /** The {@link ObjectPool} which does the real proxy management */
-    private ObjectPool<AuthenticatingHttpProxy> proxies;
+    private Queue<AuthenticatingHttpProxy> proxies = new ConcurrentLinkedQueue<AuthenticatingHttpProxy>();
 
-    /** Creates a pool of proxies which forward all calls to the same target server and port, but each one listening on a different
-     * local port. The used local port numbers begin with 'firstLocalPort' (e.g. 8000) and use the following port numbers (e.g.
-     * 8001, 8002, ...)
+    private AtomicInteger nextLocalPort;
+
+    private String targetHost;
+
+    private int targetPort;
+
+
+
+    /** Creates a pool of proxies which forward all calls to the same target server and port, but each one listening on a
+     * different local port. The used local port numbers begin with 'firstLocalPort' (e.g. 8000) and use the following port
+     * numbers (e.g. 8001, 8002, ...)
      * @param targetHost the target host
      * @param targetPortCfg the configured target port
-     * @param firstLocalPort the first local port to be opened by the proxies
-     * @param poolSize The size of the pool. */
-    public ProxyPool(String targetHost, int targetPortCfg, int firstLocalPort, int poolSize) {
-        int targetPort = (targetPortCfg >= 0 ? targetPortCfg : 80);
-        this.proxies = new ObjectPool<AuthenticatingHttpProxy>(poolSize, false);
-        for (int i = 0; i < poolSize; i++) {
-            int localPort = firstLocalPort + i;
-            this.proxies.add(new AuthenticatingHttpProxy(localPort, targetHost, targetPort));
+     * @param firstLocalPort the first local port to be opened by the proxies */
+    public ProxyPool(String targetHost, int targetPortCfg, int firstLocalPort) {
+        this.targetHost = targetHost;
+        this.targetPort = (targetPortCfg >= 0 ? targetPortCfg : 80);
+        this.nextLocalPort = new AtomicInteger(firstLocalPort);
+    }
+
+    /** Acquires a proxy for exclusive use by a single client, creating a new one if necessary.
+     * @return A proxy for exclusive use. */
+    public AuthenticatingHttpProxy acquire() {
+        if (proxies.isEmpty()) {
+            proxies.add(new AuthenticatingHttpProxy(nextLocalPort.getAndIncrement(), targetHost, targetPort));
         }
+        return proxies.poll();
     }
 
-    /** Acquires a proxy from the pool for exclusive use by a single client, waiting if necessary.
-     *  @return a new proxy from the pool
-     *  @throws InterruptedException if the wait has been interrupted */
-    public AuthenticatingHttpProxy acquire() throws InterruptedException {
-        return proxies.acquire();
-    }
-
-    /** Puts back a used proxy into the pool.
-     *  The client has to call this to put its proxy back to the pool after using it.
-     *  @param proxy The proxy to release*/
+    /** Puts back a used proxy into the pool. The client has to call this to put its proxy back to the pool after using it.
+     * @param proxy The proxy to release */
     public void release(AuthenticatingHttpProxy proxy) {
-        proxies.release(proxy);
+        proxies.add(proxy);
     }
 
 }
