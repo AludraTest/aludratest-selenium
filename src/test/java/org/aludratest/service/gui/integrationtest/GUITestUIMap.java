@@ -210,15 +210,4 @@ public class GUITestUIMap extends UIMap {
         return aludraGUI.getComponentFactory().createInputField(TEXTAREA_READONLY_ID);
     }
     
-    public void pressKeys(CharSequence... keysToPress) {
-        aludraGUI.perform().keysPress(keysToPress);
-    }
-
-    public void addCookie(String name, String value, String domain, String path, int expiry) {
-        aludraGUI.perform().addCookie(name, value, domain, path, expiry);
-    }
-    
-    public void deleteCookieNamed(String name) {
-        aludraGUI.perform().deleteCookieNamed(name);
-    }
 }
