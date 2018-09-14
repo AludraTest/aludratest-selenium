@@ -85,29 +85,13 @@ public abstract class AbstractSelenium2Action implements Action {
     @Override
     public List<Attachment> createDebugAttachments() {
         List<Attachment> attachments = new ArrayList<Attachment>(2);
-        if (getConfiguration().isScreenshotPerWindow()) {
-            attachments.addAll(takeWindowsScreenShots());
-        }
-        else {
-            attachments.add(takeScreenShot());
-        }
+        attachments.addAll(takeWindowsScreenShots());
         attachments.add(saveSource());
         return attachments;
     }
 
 
     // helper methods for child classes ----------------------------------------
-
-    /** Takes a screen shot of the current screen. */
-    protected Attachment takeScreenShot() {
-        try {
-            return wrapper.getScreenshotOfThePage();
-        }
-        catch (Exception e) { // NOSONAR
-            throw new TechnicalException("Error taking screenshot. ", e);
-        }
-    }
-
     protected List<Attachment> takeWindowsScreenShots() {
         try {
             return wrapper.getWindowsScreenshots();
