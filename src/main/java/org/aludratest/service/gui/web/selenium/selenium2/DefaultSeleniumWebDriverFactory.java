@@ -18,7 +18,10 @@ package org.aludratest.service.gui.web.selenium.selenium2;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.aludratest.service.gui.web.selenium.SeleniumWrapperConfiguration;
@@ -43,6 +46,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author falbrech */
 public class DefaultSeleniumWebDriverFactory implements SeleniumWebDriverFactory {
+
+    private static final String CHROME_AUTOMATION_EXTENSIONS_EXPERIMENTAL_ARG = "--disable-automation-extensions";
 
     private static final Map<String, Selenium2Driver> INSTANCES = new HashMap<String, Selenium2Driver>();
     static {
@@ -82,8 +87,6 @@ public class DefaultSeleniumWebDriverFactory implements SeleniumWebDriverFactory
     private static DesiredCapabilities createChromeCaps() {
         DesiredCapabilities caps = DesiredCapabilities.chrome();
         ChromeOptions opts = new ChromeOptions();
-        opts.addArguments("--disable-extensions");
-        opts.setExperimentalOption("useAutomationExtension", false);
         caps.setCapability(ChromeOptions.CAPABILITY, opts);
         return caps;
     }
@@ -199,7 +202,14 @@ public class DefaultSeleniumWebDriverFactory implements SeleniumWebDriverFactory
                 // this looks strange, but is the only way to avoid having all Threads sharing the same ChromeOptions object
                 ChromeOptions opts = (ChromeOptions) createChromeCaps().getCapability(ChromeOptions.CAPABILITY);
                 if (opts != null) {
-                    opts.addArguments(arguments);
+                    List<String> args = new ArrayList<String>(Arrays.asList(arguments));
+                    if (args.contains(CHROME_AUTOMATION_EXTENSIONS_EXPERIMENTAL_ARG)) {
+                        // translate into experimental option
+                        args.remove(CHROME_AUTOMATION_EXTENSIONS_EXPERIMENTAL_ARG);
+                        opts.setExperimentalOption("useAutomationExtension", false);
+                    }
+                    opts.addArguments(args);
+
                     caps.setCapability(ChromeOptions.CAPABILITY, opts);
                 }
             }
