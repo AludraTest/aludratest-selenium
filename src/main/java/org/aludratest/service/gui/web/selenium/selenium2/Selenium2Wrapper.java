@@ -15,11 +15,9 @@
  */
 package org.aludratest.service.gui.web.selenium.selenium2;
 
-import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -79,7 +77,6 @@ import org.aludratest.util.data.helper.DataMarkerCheck;
 import org.aludratest.util.retry.RetryService;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.databene.commons.StringUtil;
 import org.databene.commons.Validator;
 import org.openqa.selenium.Alert;
@@ -135,8 +132,6 @@ public class Selenium2Wrapper {
 
     private SeleniumResourceService resourceService;
 
-    private String usedSeleniumHost = null;
-
     private AuthenticatingHttpProxy proxy;
 
     SystemConnector systemConnector;
@@ -149,7 +144,8 @@ public class Selenium2Wrapper {
 
     private WebElement highlightedElement;
 
-    public Selenium2Wrapper(SeleniumWrapperConfiguration configuration, SeleniumResourceService resourceService) {
+    public Selenium2Wrapper(SeleniumWrapperConfiguration configuration, SeleniumResourceService resourceService,
+            SeleniumWebDriverFactory webDriverFactory) {
         try {
             this.configuration = configuration;
             this.resourceService = resourceService;
@@ -160,17 +156,19 @@ public class Selenium2Wrapper {
             }
 
             if (configuration.isUsingRemoteDriver()) {
-                this.usedSeleniumHost = resourceService.acquire();
-                this.seleniumUrl = new URL(usedSeleniumHost + "/wd/hub");
+                this.seleniumUrl = resourceService.acquire();
+                this.driver = webDriverFactory.createRemoteWebDriver(seleniumUrl, configuration);
             }
-            this.driver = newDriver();
+            else {
+                this.driver = webDriverFactory.createLocalWebDriver(configuration);
+            }
             this.driver.manage().timeouts().pageLoadTimeout(configuration.getTimeout(), TimeUnit.MILLISECONDS);
             this.locatorSupport = new LocatorSupport(this.driver, configuration);
         } catch (Exception e) {
             LOGGER.error("Error initializing Selenium 2", e);
-            String host = usedSeleniumHost;
+            URL host = seleniumUrl;
             forceCloseApplicationUnderTest();
-            throw new TechnicalException(e.getMessage() + ". Used Host = " + host, e);
+            throw new TechnicalException(e.getMessage() + ". Used Selenium URL = " + host, e);
         }
     }
 
@@ -178,27 +176,9 @@ public class Selenium2Wrapper {
         if (proxyPool == null && "http".equals(configuration.getUrlOfAutAsUrl().getProtocol())
                 && configuration.isUsingLocalProxy()) { // TODO support HTTPS
             URL url = configuration.getUrlOfAutAsUrl();
-            proxyPool = new ProxyPool(url.getHost(), url.getPort(), configuration.getMinProxyPort(),
-                    resourceService.getHostCount());
+            proxyPool = new ProxyPool(url.getHost(), url.getPort(), configuration.getMinProxyPort());
         }
         return proxyPool;
-    }
-
-    private WebDriver newDriver() {
-        try {
-            String driverName = configuration.getDriverName();
-            Selenium2Driver driverEnum = Selenium2Driver.valueOf(driverName);
-
-            if (configuration.isUsingRemoteDriver()) {
-                return driverEnum.newRemoteDriver(seleniumUrl, configuration.getBrowserArguments());
-            }
-            else {
-                return driverEnum.newLocalDriver(configuration.getBrowserArguments());
-            }
-        }
-        catch (Exception e) {
-            throw new TechnicalException("WebDriver creation failed: ", e);
-        }
     }
 
     /**
@@ -229,9 +209,9 @@ public class Selenium2Wrapper {
             }
             quit();
         }
-        if (this.usedSeleniumHost != null) {
-            resourceService.release(this.usedSeleniumHost);
-            this.usedSeleniumHost = null;
+        if (this.seleniumUrl != null) {
+            resourceService.release(this.seleniumUrl);
+            this.seleniumUrl = null;
         }
     }
 
@@ -247,11 +227,26 @@ public class Selenium2Wrapper {
     }
 
     /**
-     * 
+     *
      * @return currently used SeleniumHost
      */
     public String getUsedSeleniumHost() {
-        return usedSeleniumHost;
+        if (seleniumUrl == null) {
+            return "<no Selenium URL available>";
+        }
+        // if URL contains user/password information, remove it
+        URL safeUrl = seleniumUrl;
+        if (safeUrl.getUserInfo() != null) {
+            try {
+                safeUrl = new URL(safeUrl.getProtocol(), safeUrl.getHost(), safeUrl.getPort(), safeUrl.getFile());
+            }
+            catch (MalformedURLException e) {
+                // should NEVER occur
+                return "<invalid URL>";
+            }
+        }
+
+        return safeUrl.toString();
     }
 
     public void refresh() {
@@ -1067,13 +1062,6 @@ public class Selenium2Wrapper {
         return new StringAttachment("Source", pageSource, configuration.getPageSourceAttachmentExtension());
     }
 
-    public Attachment getScreenshotOfThePage() {
-        LOGGER.debug("getScreenshotOfThePage()");
-        final String base64Data = captureScreenshotToString();
-        final Attachment attachment = getScreenshotAttachment(base64Data);
-        return attachment;
-    }
-
     public List<Attachment> getWindowsScreenshots() {
         LOGGER.debug("getWindowsScreenshots()");
 
@@ -1121,11 +1109,8 @@ public class Selenium2Wrapper {
                 // examine alert; make screenshot of whole screen
                 try {
                     Alert alert = driver.switchTo().alert();
-                    result.add(new StringAttachment("Unexpected Alert Text", alert.getText(), "txt"));
-                    String data = captureScreenshotToString();
-                    byte[] decodedData = base64.decode(data);
-                    String title = "Full Screenshot";
-                    result.add(new BinaryAttachment(title, decodedData, configuration.getScreenshotAttachmentExtension()));
+                    result.add(new StringAttachment("Unexpected Alert Text during taking screenshot", alert.getText(), "txt"));
+                    alert.dismiss();
                 }
                 catch (Exception ee) {
                     // wow, that's bad. ignore it here.
@@ -1159,50 +1144,6 @@ public class Selenium2Wrapper {
         return result;
     }
 
-
-    private String captureScreenshotToString() {
-        // use Selenium1 interface to capture full screen
-        String url = seleniumUrl.toString();
-        Pattern p = Pattern.compile("(http(s)?://.+)/wd/hub(/?)");
-        Matcher matcher = p.matcher(url);
-        if (matcher.matches()) {
-            String screenshotUrl = matcher.group(1);
-            screenshotUrl += (screenshotUrl.endsWith("/") ? "" : "/") + "selenium-server/driver/?cmd=captureScreenshotToString";
-            InputStream in = null;
-            try {
-                in = new URL(screenshotUrl).openStream();
-                // read away "OK,"
-                if (in.read(new byte[3]) < 3) {
-                    throw new EOFException();
-                }
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                IOUtils.copy(in, baos);
-                return new String(baos.toByteArray(), "UTF-8");
-            }
-            catch (IOException e) {
-                // OK, fallthrough to Selenium 2 method
-            }
-            finally {
-                IOUtils.closeQuietly(in);
-            }
-        }
-
-        WebDriver screenshotDriver;
-        if (RemoteWebDriver.class.isAssignableFrom(driver.getClass())) {
-            screenshotDriver = new Augmenter().augment(driver);
-        }
-        else {
-            screenshotDriver = driver;
-        }
-        if (screenshotDriver instanceof TakesScreenshot) {
-            TakesScreenshot tsDriver = (TakesScreenshot) screenshotDriver;
-            return tsDriver.getScreenshotAs(OutputType.BASE64);
-        }
-        else {
-            throw new UnsupportedOperationException(driver.getClass() + " does not implement TakeScreenshot");
-        }
-    }
-
     public String captureActiveWindowScreenshotToString() {
         WebDriver screenshotDriver;
         if (RemoteWebDriver.class.isAssignableFrom(driver.getClass())) {
@@ -1218,13 +1159,6 @@ public class Selenium2Wrapper {
         else {
             throw new UnsupportedOperationException(driver.getClass() + " does not implement TakeScreenshot");
         }
-    }
-
-    private Attachment getScreenshotAttachment(String base64Data) {
-        final String title = "Screenshot";
-        final Base64 base64 = new Base64();
-        final byte[] decodedData = base64.decode(base64Data);
-        return new BinaryAttachment(title, decodedData, configuration.getScreenshotAttachmentExtension());
     }
 
     // element highlighting ----------------------------------------------------
@@ -1472,7 +1406,7 @@ public class Selenium2Wrapper {
     }
 
     public void deleteCookieNamed(String name) {
-    	driver.manage().deleteCookieNamed(name);        
+    	driver.manage().deleteCookieNamed(name);
     }
 
     public void addCookie(String name, String value, String domain, String path, int expiry) {

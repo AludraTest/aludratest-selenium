@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns="http://aludratest.org/log4testing/1.0">
+
+	<!-- global properties - configure output base path here -->
+	<properties>
+		<property>
+			<key>log4testing_outputdir</key>
+			<value>target/result</value>
+		</property>
+	</properties>
+	
+	
+	<writers>
+	
+		<!-- full HTML writer -->
+<!-- 		<writer> -->
+<!-- 			<class>org.aludratest.log4testing.html.HtmlTestLogWriter</class> -->
+<!-- 			<properties> -->
+<!-- 				<property> -->
+<!-- 					<key>outputFolder</key> -->
+<!-- 					<value>${log4testing_outputdir}/html_long</value> -->
+<!-- 				</property> -->
+<!-- 			</properties> -->
+<!-- 		</writer> -->
+		
+		<!-- HTML writer without check calls -->
+		<writer>
+			<class>org.aludratest.log4testing.html.HtmlTestLogWriter</class>
+			<properties>
+				<property>
+					<key>outputFolder</key>
+					<value>${log4testing_outputdir}/html</value>
+				</property>
+			</properties>
+		</writer>
+		
+	</writers>
+
+</configuration>

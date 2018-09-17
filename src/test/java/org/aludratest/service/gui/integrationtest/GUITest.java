@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import org.aludratest.AludraTest;
 import org.aludratest.service.ComponentId;
 import org.aludratest.service.gui.web.AludraWebGUI;
-import org.aludratest.service.gui.web.selenium.selenium1.AludraSelenium1;
 import org.aludratest.service.gui.web.selenium.selenium2.AludraSelenium2;
 import org.aludratest.testcase.TestStatus;
 import org.aludratest.testcase.event.TestStepInfo;
@@ -93,10 +92,6 @@ public abstract class GUITest extends LocalTestCase {
         if (aludraTest != null) {
             aludraTest.stopFramework();
         }
-    }
-
-    protected static void activateSelenium1() {
-        overrideImplementor(AludraWebGUI.class, AludraSelenium1.class);
     }
 
     protected static void activateSelenium2() {

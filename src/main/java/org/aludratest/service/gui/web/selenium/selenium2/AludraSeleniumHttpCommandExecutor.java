@@ -37,11 +37,12 @@ import static org.openqa.selenium.remote.DriverCommand.QUIT;
 
 import java.io.IOException;
 import java.net.BindException;
-import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.Header;
@@ -85,14 +86,17 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
 
-/** A full copy of the Selenium HttpCommandExecutor class to be able to use a custom Request timeout.
- * 
+/** A full copy of the Selenium HttpCommandExecutor class to be able to use a custom Request timeout, and to implement the ACM
+ * specific retry mechanism.
+ *
  * @author falbrech */
 public class AludraSeleniumHttpCommandExecutor implements CommandExecutor, NeedsLocalLogs {
 
     private static final int MAX_REDIRECTS = 10;
 
     private static final int THREE_HOURS = (int) TimeUnit.MILLISECONDS.convert(3, TimeUnit.HOURS);
+
+    private static final String HEADER_ACM_RETRY = "X-ACM-Retry";
 
     private final HttpHost targetHost;
     private final URL remoteServer;
@@ -106,21 +110,19 @@ public class AludraSeleniumHttpCommandExecutor implements CommandExecutor, Needs
 
     private int requestTimeout;
 
+    private Map<String, String> additionalHeaders;
+
     private HttpResponse lastResponse;
 
     /** Constructs a new HttpCommandExecutor for the given remote server.
-     * 
+     *
      * @param addressOfRemoteServer Remove server, or <code>null</code> to fall back to the System property
      *            <code>webdriver.remote.server</code>, or to <code>http://localhost:4444/wd/hub</code> if system property is not
-     *            set. */
-    public AludraSeleniumHttpCommandExecutor(URL addressOfRemoteServer) {
-        try {
-            remoteServer = addressOfRemoteServer == null ? new URL(System.getProperty("webdriver.remote.server",
-                    "http://localhost:4444/wd/hub")) : addressOfRemoteServer;
-        }
-        catch (MalformedURLException e) {
-            throw new WebDriverException(e);
-        }
+     *            set.
+     * @param additionalHeaders Additional headers to include when creating a new session. */
+    public AludraSeleniumHttpCommandExecutor(URL addressOfRemoteServer, Map<String, String> additionalHeaders) {
+        this.remoteServer = addressOfRemoteServer;
+        this.additionalHeaders = additionalHeaders;
 
         commandCodec = new JsonHttpCommandCodec();
         responseCodec = new JsonHttpResponseCodec();
@@ -133,8 +135,16 @@ public class AludraSeleniumHttpCommandExecutor implements CommandExecutor, Needs
 
         if (addressOfRemoteServer != null && addressOfRemoteServer.getUserInfo() != null) {
             // Use HTTP Basic auth
-            UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(addressOfRemoteServer.getUserInfo());
-            client = httpClientFactory.createHttpClient(credentials);
+            String up = addressOfRemoteServer.getUserInfo();
+            if (up.contains(":")) {
+                int idx = up.indexOf(':');
+                UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(up.substring(0, idx),
+                        up.substring(idx + 1));
+                client = httpClientFactory.createHttpClient(credentials);
+            }
+            else {
+                throw new WebDriverException("Invalid Selenium URL: " + addressOfRemoteServer);
+            }
         }
         else {
             client = httpClientFactory.getHttpClient();
@@ -143,13 +153,13 @@ public class AludraSeleniumHttpCommandExecutor implements CommandExecutor, Needs
         // Some machines claim "localhost.localdomain" is the same as "localhost".
         // This assumption is not always true.
 
-        String host = remoteServer.getHost().replace(".localdomain", "");
+        String host = addressOfRemoteServer.getHost().replace(".localdomain", "");
 
-        targetHost = new HttpHost(host, remoteServer.getPort(), remoteServer.getProtocol());
+        targetHost = new HttpHost(host, addressOfRemoteServer.getPort(), addressOfRemoteServer.getProtocol());
     }
 
     /** Sets the request timeout to use, in milliseconds. 0 indicates no custom timeout - Selenium defaults apply (3 hours!).
-     * 
+     *
      * @param requestTimeout Request timeout to use, in milliseconds, or 0 to disable custom timeout. */
     public void setRequestTimeout(int requestTimeout) {
         this.requestTimeout = requestTimeout;
@@ -165,12 +175,15 @@ public class AludraSeleniumHttpCommandExecutor implements CommandExecutor, Needs
     }
 
     /** Returns the address of the remote server in use.
-     * 
+     *
      * @return The address of the remote server in use. */
     public URL getAddressOfRemoteServer() {
         return remoteServer;
     }
 
+    /** Used by Selenium2Driver for logging in case of error.
+     *
+     * @return The last HTTP response received from remote. */
     public HttpResponse getLastResponse() {
         return lastResponse;
     }
@@ -189,6 +202,11 @@ public class AludraSeleniumHttpCommandExecutor implements CommandExecutor, Needs
         }
 
         HttpRequest request = commandCodec.encode(command);
+        if (NEW_SESSION.equals(command.getName())) {
+            for (Map.Entry<String, String> header : additionalHeaders.entrySet()) {
+                request.addHeader(header.getKey(), header.getValue());
+            }
+        }
 
         String requestUrl = remoteServer.toExternalForm().replaceAll("/$", "") + request.getUri();
 
@@ -219,15 +237,21 @@ public class AludraSeleniumHttpCommandExecutor implements CommandExecutor, Needs
         }
 
         try {
-            log(LogType.PROFILER, new HttpProfilerLogEntry(command.getName(), true));
-            HttpResponse response = fallBackExecute(context, httpMethod);
-            log(LogType.PROFILER, new HttpProfilerLogEntry(command.getName(), false));
+            HttpResponse response;
+            Response result;
+            do {
+                log(LogType.PROFILER, new HttpProfilerLogEntry(command.getName(), true));
+                response = fallBackExecute(context, httpMethod);
+                log(LogType.PROFILER, new HttpProfilerLogEntry(command.getName(), false));
 
-            lastResponse = response;
-            response = followRedirects(client, context, response, /* redirect count */0);
-            lastResponse = response;
+                lastResponse = response;
+                response = followRedirects(client, context, response, /* redirect count */0);
+                lastResponse = response;
 
-            return createResponse(response, context);
+                result = createResponse(response, context);
+            }
+            while (shallRetry(response, httpMethod));
+            return result;
         }
         catch (UnsupportedCommandException e) {
             if (e.getMessage() == null || "".equals(e.getMessage())) {
@@ -279,6 +303,9 @@ public class AludraSeleniumHttpCommandExecutor implements CommandExecutor, Needs
             catch (InterruptedException ie) {
                 throw Throwables.propagate(ie);
             }
+        }
+        catch (SocketException e) {
+            throw new IOException("Socket exception caused by message " + httpMethod, e);
         }
         return client.execute(targetHost, httpMethod, context);
     }
@@ -369,5 +396,17 @@ public class AludraSeleniumHttpCommandExecutor implements CommandExecutor, Needs
         }
 
         return response;
+    }
+
+    private boolean shallRetry(HttpResponse response, HttpUriRequest httpMethod) {
+        if (response.getFirstHeader(HEADER_ACM_RETRY) != null) {
+            // copy headers, if not already done
+            for (Header header : response.getAllHeaders()) {
+                if (header.getName().startsWith("X-ACM-") && !httpMethod.containsHeader(header.getName())) {
+                    httpMethod.setHeader(header.getName(), header.getValue());
+                }
+            }
+        }
+        return response.getFirstHeader(HEADER_ACM_RETRY) != null;
     }
 }

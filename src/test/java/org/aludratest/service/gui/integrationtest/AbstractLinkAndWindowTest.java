@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import org.aludratest.service.gui.web.AludraWebGUI;
 import org.aludratest.service.locator.window.TitleLocator;
 import org.aludratest.testcase.TestStatus;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -97,7 +96,6 @@ public abstract class AbstractLinkAndWindowTest extends GUITest {
     }
 
     @Test
-    @Ignore("Currently, due to a bug in ChromeDriver, this may lead to completely hanging tests.")
     public void waitForClosingWindow() {
         guiTestUIMap.testLink().click();
         checkLastStepStatus(TestStatus.PASSED);
