@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
 import org.aludratest.service.gui.web.selenium.SeleniumWrapperConfiguration;
 import org.openqa.selenium.Capabilities;
@@ -68,7 +69,15 @@ public class DefaultSeleniumWebDriverFactory implements SeleniumWebDriverFactory
             throw new IllegalArgumentException("Unsupported Selenium browser name: " + driverName);
         }
 
-        return INSTANCES.get(driverName).newLocalDriver(configuration);
+        return INSTANCES.get(driverName).newLocalDriver(configuration, createLocalWebDriverCapabilitiesFilter());
+    }
+
+    protected UnaryOperator<DesiredCapabilities> createLocalWebDriverCapabilitiesFilter() {
+        return UnaryOperator.identity();
+    }
+
+    protected UnaryOperator<DesiredCapabilities> createRemoteWebDriverCapabilitiesFilter() {
+        return createLocalWebDriverCapabilitiesFilter();
     }
 
     @Override
@@ -79,7 +88,7 @@ public class DefaultSeleniumWebDriverFactory implements SeleniumWebDriverFactory
             throw new IllegalArgumentException("Unsupported Selenium browser name: " + driverName);
         }
 
-        return INSTANCES.get(driverName).newRemoteDriver(seleniumUrl, configuration);
+        return INSTANCES.get(driverName).newRemoteDriver(seleniumUrl, configuration, createRemoteWebDriverCapabilitiesFilter());
     }
 
     // private helper methods --------------------------------------------------
@@ -117,7 +126,8 @@ public class DefaultSeleniumWebDriverFactory implements SeleniumWebDriverFactory
             this.capabilities = capabilities;
         }
 
-        public WebDriver newLocalDriver(SeleniumWrapperConfiguration configuration) {
+        public WebDriver newLocalDriver(SeleniumWrapperConfiguration configuration,
+                UnaryOperator<DesiredCapabilities> capabilitiesFilter) {
             Constructor<?> cstr = null;
             try {
                 cstr = driverClass.getConstructor(DesiredCapabilities.class);
@@ -138,6 +148,7 @@ public class DefaultSeleniumWebDriverFactory implements SeleniumWebDriverFactory
             }
 
             DesiredCapabilities caps = createCapabilitiesForLocal(configuration);
+            caps = capabilitiesFilter.apply(caps);
 
             try {
                 return (WebDriver) cstr.newInstance(caps);
@@ -156,11 +167,13 @@ public class DefaultSeleniumWebDriverFactory implements SeleniumWebDriverFactory
             }
         }
 
-        public WebDriver newRemoteDriver(URL seleniumUrl, SeleniumWrapperConfiguration configuration) {
+        public WebDriver newRemoteDriver(URL seleniumUrl, SeleniumWrapperConfiguration configuration,
+                UnaryOperator<DesiredCapabilities> capabilitiesFilter) {
             AludraSeleniumHttpCommandExecutor executor = new AludraSeleniumHttpCommandExecutor(seleniumUrl,
                     configuration.getAdditionalSeleniumHeaders());
 
             DesiredCapabilities caps = createCapabilitiesForRemote(configuration);
+            caps = capabilitiesFilter.apply(caps);
 
             try {
                 RemoteWebDriver driver = new RemoteWebDriver(executor, caps);
