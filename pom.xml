@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.aludratest</groupId>
 		<artifactId>aludratest-parent-pom</artifactId>
-		<version>1</version>
+		<version>2</version>
 	</parent>
 
 	<properties>
