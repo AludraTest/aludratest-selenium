@@ -709,7 +709,7 @@ public class Selenium2Wrapper {
         LOGGER.debug("keyPress({})", keycode);
         sendKeys(driver.switchTo().activeElement(), String.valueOf((char) keycode));
     }
-    
+
     public void keysPress(CharSequence... keycodes) {
         LOGGER.debug("keysPress({})", keycodes);
         sendKeys(driver.switchTo().activeElement(), Keys.chord(keycodes));
@@ -1139,7 +1139,17 @@ public class Selenium2Wrapper {
             }
         }
 
-        driver.switchTo().window(activeHandle);
+        try {
+            driver.switchTo().window(activeHandle);
+        }
+        catch (NoSuchWindowException e) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.warn("Could not switch back to original window after taking screenshots", e);
+            }
+            else {
+                LOGGER.warn("Could not switch back to original window after taking screenshots");
+            }
+        }
 
         return result;
     }
