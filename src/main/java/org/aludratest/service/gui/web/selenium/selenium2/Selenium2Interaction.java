@@ -313,5 +313,10 @@ public class Selenium2Interaction extends AbstractSelenium2Action implements Web
     public void deleteCookieNamed(String name) {
         wrapper.deleteCookieNamed(name);        
     }
+    
+    @Override
+    public void zoom(int percent) {
+       wrapper.zoom(percent);        
+    }
 
 }

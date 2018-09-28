@@ -132,6 +132,29 @@ public abstract class AbstractLinkAndWindowTest extends GUITest {
         aludraWebGUI.perform().waitForWindowToBeClosed("el", "op", GUITestUIMap.LINKED_PAGE_TITLE, 500);
         checkLastStepStatus(TestStatus.FAILEDPERFORMANCE);
     }
+    
+    @Test
+    public void zoomPage() throws InterruptedException {
+        aludraWebGUI.perform().zoom(50);
+        checkLastStepStatus(TestStatus.PASSED);
+    }
+    
+    /**
+     * Focus on first check box and on tab, focus on second check box.
+     * on Shift+tab focus returns to first check box.
+     */
+    @Test
+    public void assertPressKeysFocus() {
+        guiTestUIMap.firstCheckBox().focus();
+        guiTestUIMap.firstCheckBox().assertFocus();
+        checkLastStepStatus(TestStatus.PASSED);
+        aludraWebGUI.perform().keysPress("\uE004");
+        guiTestUIMap.secondCheckBox().assertFocus();
+        checkLastStepStatus(TestStatus.PASSED);
+        aludraWebGUI.perform().keysPress("\uE008","\uE004");
+        guiTestUIMap.firstCheckBox().assertFocus();
+        checkLastStepStatus(TestStatus.PASSED);
+    }
 
     private void checkOpen(TitleLocator title, boolean expectedValue) {
         boolean open = aludraWebGUI.check().isWindowOpen("el", "op", title);
