@@ -1430,7 +1430,7 @@ public class Selenium2Wrapper {
     }
     
     public void zoom(int percent) {
-        LOGGER.debug("zoom page - document.body.style.zoom");
+        LOGGER.debug("zoom page - document.body.style.zoom:"+percent+"%");
         executeScript("document.body.style.zoom='"+percent+"%';");
     }
 
