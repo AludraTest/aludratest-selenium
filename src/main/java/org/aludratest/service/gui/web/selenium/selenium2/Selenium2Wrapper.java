@@ -1428,5 +1428,10 @@ public class Selenium2Wrapper {
         cal.add(Calendar.SECOND, expiry);
         driver.manage().addCookie(new Cookie(name, value, domain, path, cal.getTime()));
     }
+    
+    public void zoom(int percent) {
+        LOGGER.debug("zoom page - document.body.style.zoom:"+percent+"%");
+        executeScript("document.body.style.zoom='"+percent+"%';");
+    }
 
 }
