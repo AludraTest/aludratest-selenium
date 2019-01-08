@@ -350,6 +350,7 @@ public class Selenium2Wrapper {
             // activate element with a click
             element.click();
             element = driver.switchTo().activeElement();
+            element.clear();
         }
 
         // setValue instead of sendKeys to ensure field is reset, and to work with file component
