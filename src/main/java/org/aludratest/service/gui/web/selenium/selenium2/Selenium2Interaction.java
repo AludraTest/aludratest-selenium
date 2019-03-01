@@ -164,6 +164,12 @@ public class Selenium2Interaction extends AbstractSelenium2Action implements Web
         wrapper.sendKeys(locator, filePath, taskCompletionTimeout);
     }
 
+    @Override
+    public void assignFileResourceNonVisibleElement(String elementType, String elementName, GUIElementLocator locator,
+            String filePath, int taskCompletionTimeout) {
+        wrapper.sendKeysInvisibleElement(locator, filePath, taskCompletionTimeout);
+    }
+
     // window operations -------------------------------------------------------
 
     @Override

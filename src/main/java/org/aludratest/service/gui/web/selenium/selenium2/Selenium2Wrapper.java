@@ -364,6 +364,12 @@ public class Selenium2Wrapper {
         doAfterDelegate(taskCompletionTimeout, "sendKeys");
     }
 
+    public void sendKeysInvisibleElement(GUIElementLocator locator, String keys, int taskCompletionTimeout) {
+        WebElement element = doBeforeDelegate(locator, false, true, true);
+        sendKeys(element, keys);
+        doAfterDelegate(taskCompletionTimeout, "sendKeysInvisible");
+    }
+
     public String getText(GUIElementLocator locator, Boolean visible) {
         WebElement element = doBeforeDelegate(locator, visible, false, false);
         String text = getText(element);
