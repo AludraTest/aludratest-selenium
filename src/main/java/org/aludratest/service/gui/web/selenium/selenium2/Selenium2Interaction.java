@@ -161,7 +161,7 @@ public class Selenium2Interaction extends AbstractSelenium2Action implements Web
     @Override
     public void assignFileResource(String elementType, String elementName, GUIElementLocator locator, String filePath,
             int taskCompletionTimeout) {
-        wrapper.sendKeys(locator, filePath, taskCompletionTimeout);
+        wrapper.assignFileName(locator, filePath, taskCompletionTimeout);
     }
 
     // window operations -------------------------------------------------------
@@ -301,7 +301,7 @@ public class Selenium2Interaction extends AbstractSelenium2Action implements Web
 
     @Override
     public void keysPress(CharSequence... keysToPress) {
-        wrapper.keysPress(keysToPress);        
+        wrapper.keysPress(keysToPress);
     }
 
     @Override
@@ -311,12 +311,12 @@ public class Selenium2Interaction extends AbstractSelenium2Action implements Web
 
     @Override
     public void deleteCookieNamed(String name) {
-        wrapper.deleteCookieNamed(name);        
+        wrapper.deleteCookieNamed(name);
     }
-    
+
     @Override
     public void zoom(int percent) {
-       wrapper.zoom(percent);        
+       wrapper.zoom(percent);
     }
 
 }
