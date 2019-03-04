@@ -364,6 +364,12 @@ public class Selenium2Wrapper {
         doAfterDelegate(taskCompletionTimeout, "sendKeys");
     }
 
+    public void assignFileName(GUIElementLocator locator, String keys, int taskCompletionTimeout) {
+        WebElement element = doBeforeDelegate(locator, false, true, true);
+        sendKeys(element, keys);
+        doAfterDelegate(taskCompletionTimeout, "assignFileName");
+    }
+
     public String getText(GUIElementLocator locator, Boolean visible) {
         WebElement element = doBeforeDelegate(locator, visible, false, false);
         String text = getText(element);
@@ -1429,7 +1435,7 @@ public class Selenium2Wrapper {
         cal.add(Calendar.SECOND, expiry);
         driver.manage().addCookie(new Cookie(name, value, domain, path, cal.getTime()));
     }
-    
+
     public void zoom(int percent) {
         LOGGER.debug("zoom page - document.body.style.zoom:"+percent+"%");
         executeScript("document.body.style.zoom='"+percent+"%';");
