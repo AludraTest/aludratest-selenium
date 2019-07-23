@@ -242,6 +242,11 @@ public class TAFMSSeleniumResourceService extends AbstractSeleniumResourceServic
     }
 
     @Override
+    public String getPropertiesBaseName() {
+        return "tafms";
+    }
+
+    @Override
     public void fillDefaults(MutablePreferences preferences) {
         // was always empty
     }

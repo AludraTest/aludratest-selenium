@@ -38,7 +38,7 @@ public abstract class AbstractSeleniumResourceService implements SeleniumResourc
     public static final String SELENIUM_URLS_PROP = "selenium.urls";
 
     @Override
-    public final String getPropertiesBaseName() {
+    public String getPropertiesBaseName() {
         return "selenium";
     }
 
