@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.aludratest.config.AludraTestConfig;
+import org.aludratest.config.ConfigProperty;
+import org.aludratest.config.ConfigProperties;
 import org.aludratest.config.MutablePreferences;
 import org.aludratest.config.Preferences;
 import org.aludratest.exception.AutomationException;
@@ -58,10 +60,18 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Uses a TAFMS server to obtain Selenium resources. The TAFMS server deals with priorities among different users.
+/**
+ * Uses a TAFMS server to obtain Selenium resources. The TAFMS server deals with priorities among different users.
  *
- * @author falbrech */
-@Implementation({ SeleniumResourceService.class })
+ * @author falbrech
+ */
+@ConfigProperties({
+        @ConfigProperty(name = "tafms.url", type = String.class, description = "The base URL to the TAFMS server providing the resources", defaultValue = "http://127.0.0.1:8080/tafms"),
+        @ConfigProperty(name = "tafms.user", type = String.class, description = "The user name to use for the TAFMS server", required = true),
+        @ConfigProperty(name = "tafms.password", type = String.class, description = "The password to use for the TAFMS server", required = true),
+        @ConfigProperty(name = "tafms.jobName", type = String.class, description = "A name to send to TAFMS as identifying job name. This is used for logging and statistics."),
+        @ConfigProperty(name = "tafms.niceLevel", type = int.class, description = "The nice level to use for this job (-20 to 19). This only affects the priority in relation to other running jobs by the same TAFMS user. The lower the value, the higher the priority.", defaultValue = "0")})
+@Implementation({SeleniumResourceService.class})
 public class TAFMSSeleniumResourceService extends AbstractSeleniumResourceService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TAFMSSeleniumResourceService.class);
@@ -121,8 +131,7 @@ public class TAFMSSeleniumResourceService extends AbstractSeleniumResourceServic
                     // continue wait?
                     if (object.has("waiting") && object.getBoolean("waiting")) {
                         query.put(REQUEST_ID, object.getString(REQUEST_ID));
-                    }
-                    else {
+                    } else {
                         JSONObject resource = object.optJSONObject("resource");
                         if (resource == null) {
                             LOG.error("TAFMS server response did not provide a resource. Message was: {}", message);
@@ -134,23 +143,19 @@ public class TAFMSSeleniumResourceService extends AbstractSeleniumResourceServic
 
                         return new URL(sUrl);
                     }
-                }
-                finally {
+                } finally {
                     IOUtils.closeQuietly(response);
                 }
             }
             while (true);
 
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOG.error("Exception in communication with TAFMS server", e);
             return null;
-        }
-        catch (JSONException e) {
+        } catch (JSONException e) {
             LOG.error("Invalid JSON received from TAFMS server. JSON message was: " + message, e);
             return null;
-        }
-        finally {
+        } finally {
             IOUtils.closeQuietly(client);
         }
     }
@@ -197,8 +202,7 @@ public class TAFMSSeleniumResourceService extends AbstractSeleniumResourceServic
             if (jobName != null && !"".equals(jobName)) {
                 query.put("jobName", jobName);
             }
-        }
-        catch (JSONException e) {
+        } catch (JSONException e) {
             LOG.warn("Error trying to parse JSON for query", e);
         }
         return query;
@@ -224,11 +228,9 @@ public class TAFMSSeleniumResourceService extends AbstractSeleniumResourceServic
 
         try {
             response = client.execute(request);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOG.warn("Could not release TAFMS resource", e);
-        }
-        finally {
+        } finally {
             IOUtils.closeQuietly(response);
             IOUtils.closeQuietly(client);
         }
@@ -255,8 +257,7 @@ public class TAFMSSeleniumResourceService extends AbstractSeleniumResourceServic
         String url = preferences.getStringValue("tafms.url");
         try {
             new URL(url);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new AutomationException("Illegal URL for tafms.url: " + url, e);
         }
 
@@ -288,11 +289,10 @@ public class TAFMSSeleniumResourceService extends AbstractSeleniumResourceServic
         HttpEntity entity = response.getEntity();
         InputStream in = entity.getContent();
 
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()){
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             IOUtils.copy(in, baos);
             return new String(baos.toByteArray(), "UTF-8");
-        }
-        finally {
+        } finally {
             EntityUtils.consumeQuietly(entity);
             IOUtils.closeQuietly(in);
         }
